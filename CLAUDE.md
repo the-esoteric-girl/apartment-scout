@@ -10,19 +10,21 @@ Apartment Scout is a personal AI-powered apartment research tool for a solo user
 
 **This is a solo-use tool.** No auth, no multi-user, no backend database. Simplicity is a feature.
 
+After each working feature, remind me to commit to GitHub.
+
 ---
 
 ## Tech Stack
 
-| Layer | Choice | Notes |
-|---|---|---|
-| Framework | React 19 (Vite 7) | Component-based, fast HMR |
-| Styling | Tailwind CSS v4 | Vite plugin — no config file needed |
-| AI | Anthropic Claude API (`claude-sonnet-4-20250514`) | Via serverless function only |
-| Persistence | `localStorage` | Two keys: listings + criteria |
-| Hosting | Vercel | Auto-deploys from GitHub |
-| Drag-and-drop | `@dnd-kit/core`, `@dnd-kit/sortable` | Settings criteria reordering |
-| IDs | `uuid` (v4) | For stable listing and criteria keys |
+| Layer         | Choice                                            | Notes                                |
+| ------------- | ------------------------------------------------- | ------------------------------------ |
+| Framework     | React 19 (Vite 7)                                 | Component-based, fast HMR            |
+| Styling       | Tailwind CSS v4                                   | Vite plugin — no config file needed  |
+| AI            | Anthropic Claude API (`claude-sonnet-4-20250514`) | Via serverless function only         |
+| Persistence   | `localStorage`                                    | Two keys: listings + criteria        |
+| Hosting       | Vercel                                            | Auto-deploys from GitHub             |
+| Drag-and-drop | `@dnd-kit/core`, `@dnd-kit/sortable`              | Settings criteria reordering         |
+| IDs           | `uuid` (v4)                                       | For stable listing and criteria keys |
 
 ---
 
@@ -68,23 +70,29 @@ apartment-scout/
 ## Key Architectural Decisions — Never Reverse Without Discussion
 
 ### 1. API key lives server-side only (`/api/analyze.js`)
+
 The Anthropic API key **must never** appear in the browser bundle. The Vercel serverless function at `/api/analyze` is the sole caller of the Anthropic API. The React frontend calls `/api/analyze` via `fetch`. Using `VITE_` prefix would expose the key in the client bundle — don't do it.
 
 **Locally:** Use `vercel dev` (not `npm run dev`) to run the serverless function alongside Vite.
 
 ### 2. Decision Mode uses stored scores — no re-analysis
+
 When a saved listing is loaded into Decision Mode, we use its stored `scores`, `weighted_score`, and `verdict` as-is. We do **not** re-call the Claude API. This saves cost and keeps behavior predictable.
 
 ### 3. Criteria keys are permanent UUIDs — labels are display-only
+
 Each criterion has a stable `key` (built-in criteria use semantic keys like `washer_dryer`; user-added criteria get a UUID). The `key` is used as the JSON property in stored scores. The `label` is display-only and can be renamed freely without breaking anything.
 
 ### 4. Criteria changes recalculate scores locally — no API call
+
 When the user reorders, adds, or removes criteria, existing saved listings are recalculated using `recalculateForCriteria()` in `scoring.js`. The stored `yes/no/unclear` scores don't change — only weights and verdict are recalculated. New criteria missing from old listings default to `"unclear"`. This is free and instant.
 
 ### 5. Hard disqualifiers force score to 0 / verdict to Skip
+
 Any criterion with `isDisqualifier: true` that scores `"no"` immediately sets `weighted_score = 0` and `verdict = "skip"`. This is enforced in both `scoring.js` (for local recalculation) and in the Claude system prompt (for fresh analysis).
 
 ### 6. Scorecard shows rank numbers, not weights
+
 The user sees `#1`, `#2`, etc. in the criteria scorecard. Numeric weights (28.6%, 23.8%, etc.) are internal only — never rendered in any UI element. The user controls priority through drag-to-reorder in Settings.
 
 ---
@@ -92,9 +100,11 @@ The user sees `#1`, `#2`, etc. in the criteria scorecard. Numeric weights (28.6%
 ## Scoring System
 
 Weights are calculated automatically from rank position (rank 1 = most important):
+
 ```
 weight[i] = (N - i) / sum(1..N) * 100
 ```
+
 For 6 criteria: `[28.6%, 23.8%, 19%, 14.3%, 9.5%, 4.8%]` — always sums to 100%.
 
 **Score values:** `yes` = full weight · `unclear` = half weight · `no` = 0
@@ -107,17 +117,17 @@ For 6 criteria: `[28.6%, 23.8%, 19%, 14.3%, 9.5%, 4.8%]` — always sums to 100%
 
 Use inline `style` props for these — they're not in Tailwind config:
 
-| Purpose | Value |
-|---|---|
-| Primary dark | `#1a1a2e` |
-| Accent teal | `#2A7F7F` |
-| Background | `#f7f7f5` |
-| Surface (cards) | `#ffffff` |
-| Border | `#e8e8e8` |
-| Yes/green text | `#43a047` · bg `#e8f5e9` |
-| No/red text | `#ef5350` · bg `#ffebee` |
+| Purpose            | Value                    |
+| ------------------ | ------------------------ |
+| Primary dark       | `#1a1a2e`                |
+| Accent teal        | `#2A7F7F`                |
+| Background         | `#f7f7f5`                |
+| Surface (cards)    | `#ffffff`                |
+| Border             | `#e8e8e8`                |
+| Yes/green text     | `#43a047` · bg `#e8f5e9` |
+| No/red text        | `#ef5350` · bg `#ffebee` |
 | Unclear/amber text | `#ffb300` · bg `#fff8e1` |
-| Tour/blue | `#1565c0` |
+| Tour/blue          | `#1565c0`                |
 
 ---
 
@@ -135,9 +145,9 @@ Use inline `style` props for these — they're not in Tailwind config:
 
 ## localStorage Keys
 
-| Key | Contents |
-|---|---|
-| `apartment_scout_listings` | JSON array of saved listing objects |
+| Key                        | Contents                                 |
+| -------------------------- | ---------------------------------------- |
+| `apartment_scout_listings` | JSON array of saved listing objects      |
 | `apartment_scout_criteria` | JSON array of criteria in priority order |
 
 Both are read/written exclusively through `src/utils/storage.js`.
@@ -163,6 +173,7 @@ vercel dev
 ```
 
 **First-time Vercel setup:**
+
 ```bash
 npm install -g vercel
 vercel login
@@ -173,11 +184,11 @@ vercel link   # link to your Vercel project
 
 ## Phases
 
-| Phase | Focus | Status |
-|---|---|---|
-| 1 | Foundation — utilities, API function, App shell | ✅ Complete |
-| 2 | Browse Tab — analyze + scorecard + save | ✅ Complete |
-| 3 | Saved Tab — listing cards, filter/sort/search | ✅ Complete |
-| 4 | Decision Tab — side-by-side comparison | ✅ Complete |
-| 5 | Settings Overlay — drag-to-reorder criteria | Pending |
-| 6 | Polish — responsive, error states, edge cases | Pending |
+| Phase | Focus                                           | Status      |
+| ----- | ----------------------------------------------- | ----------- |
+| 1     | Foundation — utilities, API function, App shell | ✅ Complete |
+| 2     | Browse Tab — analyze + scorecard + save         | ✅ Complete |
+| 3     | Saved Tab — listing cards, filter/sort/search   | ✅ Complete |
+| 4     | Decision Tab — side-by-side comparison          | ✅ Complete |
+| 5     | Settings Overlay — drag-to-reorder criteria     | ✅ Complete |
+| 6     | Polish — responsive, error states, edge cases   | Pending     |

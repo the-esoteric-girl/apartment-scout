@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Skill(gsd:plan-phase)",
+      "Skill(gsd:plan-phase:*)"
     ]
   }
 }
