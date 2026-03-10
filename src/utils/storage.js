@@ -1,0 +1,95 @@
+/**
+ * storage.js
+ *
+ * All localStorage reads and writes go through these functions.
+ * Keeping I/O in one place means if we ever swap to a different
+ * storage backend (IndexedDB, a real API), we only change this file.
+ *
+ * Two localStorage keys:
+ *   apartment_scout_listings  — array of saved listing objects
+ *   apartment_scout_criteria  — array of criteria in priority order
+ */
+
+import { DEFAULT_CRITERIA } from '../constants/defaultCriteria';
+
+const LISTINGS_KEY = 'apartment_scout_listings';
+const CRITERIA_KEY = 'apartment_scout_criteria';
+
+// ─────────────────────────────────────────
+// Listings
+// ─────────────────────────────────────────
+
+/** Read all saved listings. Returns [] on error or empty storage. */
+export function getListings() {
+  try {
+    const raw = localStorage.getItem(LISTINGS_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch {
+    // If the stored JSON is corrupted somehow, start fresh rather than crashing
+    return [];
+  }
+}
+
+/** Add a new listing to the saved list. */
+export function saveListing(listing) {
+  const listings = getListings();
+  listings.push(listing);
+  try {
+    localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
+  } catch (e) {
+    // localStorage can throw if storage is full (QuotaExceededError)
+    if (e.name === 'QuotaExceededError') {
+      throw new Error('STORAGE_FULL');
+    }
+    throw e;
+  }
+}
+
+/** Update specific fields on an existing listing by id. */
+export function updateListing(id, changes) {
+  const listings = getListings().map(l =>
+    l.id === id ? { ...l, ...changes } : l
+  );
+  localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
+}
+
+/** Remove a listing by id. */
+export function deleteListing(id) {
+  const listings = getListings().filter(l => l.id !== id);
+  localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
+}
+
+/**
+ * Check if a listing with the same raw text is already saved.
+ * Used to show "Already saved ✓" state on the Save button.
+ */
+export function isListingSaved(rawText) {
+  return getListings().some(l => l.rawText === rawText);
+}
+
+// ─────────────────────────────────────────
+// Criteria
+// ─────────────────────────────────────────
+
+/** Read saved criteria. Falls back to defaults if nothing is stored yet. */
+export function getCriteria() {
+  try {
+    const raw = localStorage.getItem(CRITERIA_KEY);
+    if (!raw) return DEFAULT_CRITERIA;
+    return JSON.parse(raw);
+  } catch {
+    return DEFAULT_CRITERIA;
+  }
+}
+
+/** Save the current criteria array (after user edits in Settings). */
+export function saveCriteria(criteria) {
+  localStorage.setItem(CRITERIA_KEY, JSON.stringify(criteria));
+}
+
+/** Reset criteria to defaults and return the default array. */
+export function resetCriteria() {
+  localStorage.setItem(CRITERIA_KEY, JSON.stringify(DEFAULT_CRITERIA));
+  return DEFAULT_CRITERIA;
+}

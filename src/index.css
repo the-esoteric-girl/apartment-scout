@@ -1,0 +1,22 @@
+/* DM Sans from Google Fonts — weights 400 (regular), 500 (medium), 700 (bold), 800 (extra-bold) */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+
+/* Tailwind v4 — single import replaces the old 3-line @tailwind setup */
+@import "tailwindcss";
+
+/* Reset Vite's default styles and set our design tokens globally */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #f7f7f5;
+    color: #1a1a2e;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+}

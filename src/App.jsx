@@ -1,0 +1,194 @@
+/**
+ * App.jsx — Root component
+ *
+ * Manages the three things that need to be accessible app-wide:
+ *   - activeTab: which tab is showing
+ *   - criteria: the user's scoring criteria (read from localStorage on load)
+ *   - listings: all saved listings (read from localStorage on load)
+ *   - showSettings: whether the settings overlay is open
+ *   - decisionPreload: a listing to pre-load into Decision tab (from "Use in Decision Mode")
+ *
+ * Why keep listings + criteria here instead of reading localStorage in each tab?
+ * Because React needs to re-render when data changes. If Tab A saves a listing,
+ * Tab B needs to show it immediately — that only works if they share the same
+ * state. Lifting state to the common parent (App) is the React way.
+ */
+
+import { useState } from 'react';
+import { getCriteria, getListings, saveCriteria, saveListing, updateListing, deleteListing } from './utils/storage';
+import { recalculateForCriteria } from './utils/scoring';
+import BrowseTab from './components/tabs/BrowseTab';
+import DecisionTab from './components/tabs/DecisionTab';
+import SavedTab from './components/tabs/SavedTab';
+import SettingsOverlay from './components/SettingsOverlay';
+
+const TABS = [
+  { id: 'browse',   label: 'Browse',   icon: '🔍' },
+  { id: 'decision', label: 'Decision', icon: '⚖️' },
+  { id: 'saved',    label: 'Saved',    icon: '🏠' },
+];
+
+export default function App() {
+  // ── State ────────────────────────────────────────────────────────────────
+  const [activeTab, setActiveTab] = useState('browse');
+  const [showSettings, setShowSettings] = useState(false);
+
+  // () => getCriteria() means "run this once on mount to get the initial value"
+  // This pattern (lazy initial state) avoids reading localStorage on every render
+  const [criteria, setCriteria] = useState(() => getCriteria());
+  const [listings, setListings] = useState(() => getListings());
+
+  // When user clicks "Use in Decision Mode" from a saved listing
+  const [decisionPreload, setDecisionPreload] = useState(null);
+
+  // ── Listing actions (passed down to child tabs) ───────────────────────────
+  function handleSaveListing(listing) {
+    saveListing(listing);
+    setListings(getListings()); // re-sync state from localStorage
+  }
+
+  function handleUpdateListing(id, changes) {
+    updateListing(id, changes);
+    setListings(getListings());
+  }
+
+  function handleDeleteListing(id) {
+    deleteListing(id);
+    setListings(getListings());
+  }
+
+  function handleUseInDecision(listing) {
+    setDecisionPreload(listing);
+    setActiveTab('decision');
+  }
+
+  // ── Criteria actions ──────────────────────────────────────────────────────
+  function handleSaveCriteria(newCriteria) {
+    saveCriteria(newCriteria);
+    setCriteria(newCriteria);
+
+    // When criteria change, recalculate scores for all saved listings.
+    // The raw yes/no/unclear scores stay the same — only the weights and
+    // verdicts are recalculated. Missing scores (new criteria) default to "unclear".
+    const updatedListings = listings.map(l => recalculateForCriteria(l, newCriteria));
+    updatedListings.forEach(l => updateListing(l.id, {
+      weighted_score: l.weighted_score,
+      verdict: l.verdict,
+    }));
+    setListings(getListings());
+
+    setShowSettings(false);
+  }
+
+  // ── Tab header ────────────────────────────────────────────────────────────
+  const savedCount = listings.length;
+
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: '#f7f7f5' }}>
+
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <header
+        className="sticky top-0 z-40 border-b"
+        style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
+      >
+        <div
+          className="mx-auto flex items-center justify-between px-8"
+          style={{ maxWidth: '1100px', height: '56px' }}
+        >
+          {/* Logo */}
+          <span className="font-extrabold text-lg tracking-tight" style={{ color: '#1a1a2e' }}>
+            Apartment Scout
+          </span>
+
+          {/* Tab navigation — center */}
+          <nav className="flex items-center gap-1">
+            {TABS.map(tab => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                  style={{
+                    color: isActive ? '#1a1a2e' : '#6b7280',
+                    backgroundColor: isActive ? '#f3f4f6' : 'transparent',
+                  }}
+                >
+                  <span>{tab.icon}</span>
+                  <span>{tab.label}</span>
+
+                  {/* Count badge on Saved tab */}
+                  {tab.id === 'saved' && savedCount > 0 && (
+                    <span
+                      className="ml-0.5 rounded-full px-1.5 py-0 text-xs font-bold text-white"
+                      style={{ backgroundColor: '#2A7F7F', fontSize: '11px' }}
+                    >
+                      {savedCount}
+                    </span>
+                  )}
+
+                  {/* Active underline indicator */}
+                  {isActive && (
+                    <span
+                      className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full"
+                      style={{ backgroundColor: '#2A7F7F' }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Settings gear icon — right side */}
+          <button
+            onClick={() => setShowSettings(true)}
+            className="flex items-center justify-center w-9 h-9 rounded-lg transition-colors text-lg"
+            style={{ color: '#6b7280' }}
+            title="Scoring criteria settings"
+          >
+            ⚙
+          </button>
+        </div>
+      </header>
+
+      {/* ── Tab content ────────────────────────────────────────────────── */}
+      <main className="mx-auto px-4 sm:px-8 py-8" style={{ maxWidth: '1100px' }}>
+        {activeTab === 'browse' && (
+          <BrowseTab
+            criteria={criteria}
+            listings={listings}
+            onSave={handleSaveListing}
+          />
+        )}
+        {activeTab === 'decision' && (
+          <DecisionTab
+            criteria={criteria}
+            listings={listings}
+            preloadListing={decisionPreload}
+            onPreloadConsumed={() => setDecisionPreload(null)}
+            onSave={handleSaveListing}
+          />
+        )}
+        {activeTab === 'saved' && (
+          <SavedTab
+            criteria={criteria}
+            listings={listings}
+            onUpdate={handleUpdateListing}
+            onDelete={handleDeleteListing}
+            onUseInDecision={handleUseInDecision}
+            onGoToBrowse={() => setActiveTab('browse')}
+          />
+        )}
+      </main>
+
+      {/* ── Settings overlay ───────────────────────────────────────────── */}
+      {showSettings && (
+        <SettingsOverlay
+          criteria={criteria}
+          onSave={handleSaveCriteria}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
+    </div>
+  );
+}
