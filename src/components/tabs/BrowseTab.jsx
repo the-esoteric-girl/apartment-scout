@@ -223,6 +223,8 @@ export default function BrowseTab({ criteria, listings, location, onSave }) {
       name: result.name || 'Unnamed listing',
       address: result.address || '',
       price: result.price || '',
+      bedrooms: result.bedrooms ?? null,
+      neighborhood: result.neighborhood ?? null,
       url: urlOrLabel.trim() || null,
       rawText: listingText,
       scores: result.scores,
@@ -279,26 +281,40 @@ export default function BrowseTab({ criteria, listings, location, onSave }) {
             onChange={e => setListingText(e.target.value)}
             placeholder="Paste the full listing text here — description, amenities, price, location..."
             rows={6}
-            className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-none"
+            className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-y"
+            style={{ minHeight: '120px' }}
             style={{ borderColor: '#e8e8e8', color: '#1a1a2e' }}
             onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
             onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
           />
         </div>
 
-        {/* Analyze button */}
-        <button
-          onClick={handleAnalyze}
-          disabled={!canAnalyze}
-          className="w-full py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
-          style={{
-            backgroundColor: canAnalyze ? '#1a1a2e' : '#e8e8e8',
-            color: canAnalyze ? '#ffffff' : '#9ca3af',
-            cursor: canAnalyze ? 'pointer' : 'default',
-          }}
-        >
-          {isLoading ? <><Spinner /> Analyzing…</> : 'Analyze Listing'}
-        </button>
+        {/* Analyze button / reset */}
+        <div className="flex gap-2">
+          <button
+            onClick={handleAnalyze}
+            disabled={!canAnalyze}
+            className="flex-1 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
+            style={{
+              backgroundColor: canAnalyze ? '#1a1a2e' : '#e8e8e8',
+              color: canAnalyze ? '#ffffff' : '#9ca3af',
+              cursor: canAnalyze ? 'pointer' : 'default',
+            }}
+          >
+            {isLoading ? <><Spinner /> Analyzing…</> : 'Analyze Listing'}
+          </button>
+
+          {result && (
+            <button
+              onClick={() => { setUrlOrLabel(''); setListingText(''); setResult(null); setError(null); setJustSaved(false); }}
+              className="px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
+              style={{ borderColor: '#e8e8e8', color: '#6b7280', backgroundColor: '#ffffff' }}
+              title="Clear and start over"
+            >
+              Clear
+            </button>
+          )}
+        </div>
 
         {/* No criteria warning */}
         {criteria.length === 0 && (

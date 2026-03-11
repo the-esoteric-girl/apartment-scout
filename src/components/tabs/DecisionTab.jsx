@@ -308,7 +308,7 @@ function ResultCard({ result, isWinner, criteria, alreadySaved, isSaved, onSave 
 // ─────────────────────────────────────────────────────────────
 // Main component
 // ─────────────────────────────────────────────────────────────
-export default function DecisionTab({ criteria, listings, location, preloadListing, onPreloadConsumed, onSave }) {
+export default function DecisionTab({ criteria, listings, location, preloadListing, preloadMany, onPreloadConsumed, onSave }) {
   const [slots, setSlots] = useState(() => [
     createSlot('new'),
     createSlot('new'),
@@ -319,7 +319,7 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
   // Track which result slots (by index) have been saved this session
   const [savedIndices, setSavedIndices] = useState(new Set());
 
-  // Consume preloaded listing into slot 0
+  // Consume single preloaded listing into slot 0
   useEffect(() => {
     if (preloadListing) {
       setSlots(prev => {
@@ -333,6 +333,20 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
       onPreloadConsumed();
     }
   }, [preloadListing]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Consume multi-listing preload (from compare queue in Saved tab)
+  useEffect(() => {
+    if (preloadMany && preloadMany.length >= 2) {
+      const newSlots = preloadMany.map(l => createSlot('saved', l));
+      // Pad to at least 2 slots
+      while (newSlots.length < 2) newSlots.push(createSlot('new'));
+      setSlots(newSlots);
+      setResults(null);
+      setError(null);
+      setSavedIndices(new Set());
+      onPreloadConsumed();
+    }
+  }, [preloadMany]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function updateSlot(index, changes) {
     setSlots(prev => prev.map((s, i) => i === index ? { ...s, ...changes } : s));
@@ -434,6 +448,8 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
       name: resultListing.name || 'Unnamed listing',
       address: resultListing.address || '',
       price: resultListing.price || '',
+      bedrooms: resultListing.bedrooms ?? slot.savedListing?.bedrooms ?? null,
+      neighborhood: resultListing.neighborhood ?? slot.savedListing?.neighborhood ?? null,
       url: slot.mode === 'new' ? (slot.urlOrLabel?.trim() || null) : null,
       rawText: slot.mode === 'new' ? slot.text : (slot.savedListing?.rawText ?? ''),
       scores: resultListing.scores,

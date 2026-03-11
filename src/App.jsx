@@ -39,8 +39,10 @@ export default function App() {
   const [listings, setListings] = useState(() => getListings());
   const [location, setLocation] = useState(() => getLocation());
 
-  // When user clicks "Use in Decision Mode" from a saved listing
+  // When user clicks "Use in Decision Mode" from a saved listing (single)
+  // or "Compare selected" from the Saved tab compare queue (array)
   const [decisionPreload, setDecisionPreload] = useState(null);
+  const [decisionPreloadMany, setDecisionPreloadMany] = useState(null);
 
   // ── Listing actions (passed down to child tabs) ───────────────────────────
   function handleSaveListing(listing) {
@@ -60,6 +62,11 @@ export default function App() {
 
   function handleUseInDecision(listing) {
     setDecisionPreload(listing);
+    setActiveTab('decision');
+  }
+
+  function handleCompareMany(listingsToCompare) {
+    setDecisionPreloadMany(listingsToCompare);
     setActiveTab('decision');
   }
 
@@ -116,21 +123,22 @@ export default function App() {
           </span>
 
           {/* Tab navigation — center */}
-          <nav className="flex items-center gap-1">
+          <nav className="flex items-center gap-0.5 sm:gap-1">
             {TABS.map(tab => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                  className="relative flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
                   style={{
                     color: isActive ? '#1a1a2e' : '#6b7280',
                     backgroundColor: isActive ? '#f3f4f6' : 'transparent',
                   }}
+                  title={tab.label}
                 >
                   <span>{tab.icon}</span>
-                  <span>{tab.label}</span>
+                  <span className="hidden sm:inline">{tab.label}</span>
 
                   {/* Count badge on Saved tab */}
                   {tab.id === 'saved' && savedCount > 0 && (
@@ -145,7 +153,7 @@ export default function App() {
                   {/* Active underline indicator */}
                   {isActive && (
                     <span
-                      className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full"
+                      className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full"
                       style={{ backgroundColor: '#2A7F7F' }}
                     />
                   )}
@@ -167,7 +175,7 @@ export default function App() {
       </header>
 
       {/* ── Tab content ────────────────────────────────────────────────── */}
-      <main className="mx-auto px-4 sm:px-8 py-8" style={{ maxWidth: '1100px' }}>
+      <main className="mx-auto px-3 sm:px-8 py-5 sm:py-8" style={{ maxWidth: '1100px' }}>
         {activeTab === 'browse' && (
           <BrowseTab
             criteria={criteria}
@@ -182,7 +190,8 @@ export default function App() {
             listings={listings}
             location={location}
             preloadListing={decisionPreload}
-            onPreloadConsumed={() => setDecisionPreload(null)}
+            preloadMany={decisionPreloadMany}
+            onPreloadConsumed={() => { setDecisionPreload(null); setDecisionPreloadMany(null); }}
             onSave={handleSaveListing}
           />
         )}
@@ -193,6 +202,7 @@ export default function App() {
             onUpdate={handleUpdateListing}
             onDelete={handleDeleteListing}
             onUseInDecision={handleUseInDecision}
+            onCompareMany={handleCompareMany}
             onGoToBrowse={() => setActiveTab('browse')}
           />
         )}

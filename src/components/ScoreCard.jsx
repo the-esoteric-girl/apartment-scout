@@ -12,7 +12,10 @@
  */
 import ScorePill from './ScorePill';
 
-export default function ScoreCard({ scores, criteria }) {
+const SCORE_CYCLE = { yes: 'unclear', unclear: 'no', no: 'yes' };
+
+// onScoreChange(key, newScore) — optional; when provided, pills become clickable
+export default function ScoreCard({ scores, criteria, onScoreChange }) {
   const scored = criteria.filter(c => !c.flagOnly);
 
   return (
@@ -27,20 +30,15 @@ export default function ScoreCard({ scores, criteria }) {
             className="flex items-center justify-between py-2.5"
           >
             <div className="flex items-center gap-2.5">
-              {/* Rank number */}
               <span
                 className="text-xs font-semibold w-6 text-center shrink-0"
                 style={{ color: '#9ca3af' }}
               >
                 #{rank}
               </span>
-
-              {/* Criterion label */}
               <span className="text-sm font-medium" style={{ color: '#1a1a2e' }}>
                 {criterion.label}
               </span>
-
-              {/* Hard disqualifier marker */}
               {criterion.isDisqualifier && (
                 <span
                   className="text-xs px-1.5 py-0.5 rounded font-medium"
@@ -51,10 +49,26 @@ export default function ScoreCard({ scores, criteria }) {
               )}
             </div>
 
-            <ScorePill score={score} />
+            {onScoreChange ? (
+              <button
+                onClick={() => onScoreChange(criterion.key, SCORE_CYCLE[score] ?? 'unclear')}
+                title="Click to override score"
+                className="rounded transition-opacity hover:opacity-75"
+              >
+                <ScorePill score={score} />
+              </button>
+            ) : (
+              <ScorePill score={score} />
+            )}
           </div>
         );
       })}
+
+      {onScoreChange && (
+        <p className="pt-2 text-xs" style={{ color: '#9ca3af' }}>
+          Tap a score to override · cycles yes → unclear → no
+        </p>
+      )}
     </div>
   );
 }

@@ -15,6 +15,7 @@
 import { useState, useRef, useEffect } from 'react';
 import ScoreCard from './ScoreCard';
 import VerdictBadge from './VerdictBadge';
+import { calculateWeightedScore, calculateVerdict } from '../utils/scoring';
 
 // ─────────────────────────────────────────────────────────────
 // Status config
@@ -63,7 +64,7 @@ function formatDate(isoString) {
 // ─────────────────────────────────────────────────────────────
 // Main component
 // ─────────────────────────────────────────────────────────────
-export default function ListingCard({ listing, criteria, onUpdate, onDelete, onUseInDecision }) {
+export default function ListingCard({ listing, criteria, onUpdate, onDelete, onUseInDecision, onAddToCompare, inCompareQueue }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState(listing.name);
@@ -102,6 +103,13 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
     if (localNotes !== listing.notes) {
       onUpdate(listing.id, { notes: localNotes });
     }
+  }
+
+  function handleScoreChange(key, newScore) {
+    const newScores = { ...listing.scores, [key]: newScore };
+    const newWeightedScore = calculateWeightedScore(newScores, criteria);
+    const newVerdict = calculateVerdict(newScores, criteria, newWeightedScore);
+    onUpdate(listing.id, { scores: newScores, weighted_score: newWeightedScore, verdict: newVerdict });
   }
 
   const petPolicy = listing.scores?.pet_policy;
@@ -233,7 +241,7 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
             <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#9ca3af' }}>
               Scorecard
             </p>
-            <ScoreCard scores={listing.scores} criteria={criteria} />
+            <ScoreCard scores={listing.scores} criteria={criteria} onScoreChange={handleScoreChange} />
           </div>
 
           {/* Neighborhood note */}
@@ -279,15 +287,31 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
             />
           </div>
 
-          {/* Footer: Use in Decision Mode + timestamp */}
-          <div className="flex items-center justify-between gap-4 pt-1">
-            <button
-              onClick={() => onUseInDecision(listing)}
-              className="text-sm font-semibold px-4 py-2 rounded-lg border transition-colors"
-              style={{ color: '#2A7F7F', borderColor: '#2A7F7F', backgroundColor: '#ffffff' }}
-            >
-              ⚖️ Use in Decision Mode
-            </button>
+          {/* Footer: Use in Decision Mode + Compare + timestamp */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => onUseInDecision(listing)}
+                className="text-sm font-semibold px-4 py-2 rounded-lg border transition-colors"
+                style={{ color: '#2A7F7F', borderColor: '#2A7F7F', backgroundColor: '#ffffff' }}
+              >
+                ⚖️ Use in Decision Mode
+              </button>
+
+              {onAddToCompare && (
+                <button
+                  onClick={() => onAddToCompare(listing)}
+                  className="text-sm font-semibold px-4 py-2 rounded-lg border transition-colors"
+                  style={
+                    inCompareQueue
+                      ? { color: '#ffffff', borderColor: '#1a1a2e', backgroundColor: '#1a1a2e' }
+                      : { color: '#6b7280', borderColor: '#e8e8e8', backgroundColor: '#ffffff' }
+                  }
+                >
+                  {inCompareQueue ? '✓ In compare' : '+ Compare'}
+                </button>
+              )}
+            </div>
 
             <span className="text-xs" style={{ color: '#9ca3af' }}>
               Saved {formatDate(listing.savedAt)}
