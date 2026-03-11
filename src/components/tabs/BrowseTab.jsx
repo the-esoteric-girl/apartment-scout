@@ -12,7 +12,7 @@
  *   listings  — all saved listings (used to detect already-saved state)
  *   onSave    — fn(listing) → called when user saves a result
  */
-import { useState } from 'react';
+import { useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { buildSystemPrompt, buildBrowsePrompt, analyzeListing } from '../../utils/claude';
 import ScoreCard from '../ScoreCard';
@@ -179,13 +179,8 @@ function ResultSection({ result, criteria, isSaved, onSave }) {
 // Main component
 // ─────────────────────────────────────────────────────────────
 
-export default function BrowseTab({ criteria, listings, location, onSave }) {
-  const [urlOrLabel, setUrlOrLabel] = useState('');
-  const [listingText, setListingText] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
-  const [justSaved, setJustSaved] = useState(false);
+export default function BrowseTab({ criteria, listings, location, onSave, browseState, onBrowseStateChange, showLeavePrompt, onConfirmLeave, onCancelLeave }) {
+  const { urlOrLabel, listingText, result, error, isLoading, justSaved } = browseState;
 
   const canAnalyze = listingText.trim().length > 20 && !isLoading && criteria.length > 0;
 
@@ -196,23 +191,20 @@ export default function BrowseTab({ criteria, listings, location, onSave }) {
 
   const isSaved = alreadySaved || justSaved;
 
-  async function handleAnalyze() {
-    setIsLoading(true);
-    setError(null);
-    setResult(null);
-    setJustSaved(false);
+  const handleAnalyze = useCallback(async () => {
+    onBrowseStateChange({ isLoading: true, error: null, result: null, justSaved: false });
 
     try {
       const system = buildSystemPrompt(criteria, location);
       const userPrompt = buildBrowsePrompt(listingText, urlOrLabel);
       const data = await analyzeListing({ system, userPrompt });
-      setResult(data);
+      onBrowseStateChange({ result: data });
     } catch (err) {
-      setError(err.message);
+      onBrowseStateChange({ error: err.message });
     } finally {
-      setIsLoading(false);
+      onBrowseStateChange({ isLoading: false });
     }
-  }
+  }, [criteria, location, listingText, urlOrLabel, onBrowseStateChange]);
 
   function handleSave() {
     if (!result || isSaved) return;
@@ -236,11 +228,39 @@ export default function BrowseTab({ criteria, listings, location, onSave }) {
       notes: '',
     });
 
-    setJustSaved(true);
+    onBrowseStateChange({ justSaved: true });
   }
 
   return (
     <div className="mx-auto" style={{ maxWidth: '680px' }}>
+
+      {/* ── Leave confirmation banner ── */}
+      {showLeavePrompt && (
+        <div
+          className="rounded-xl border p-4 mb-5 flex items-center justify-between gap-4"
+          style={{ backgroundColor: '#fff8e1', borderColor: '#ffb300' }}
+        >
+          <p className="text-sm font-medium" style={{ color: '#92400e' }}>
+            You have unsaved content — leave without saving?
+          </p>
+          <div className="flex gap-2 shrink-0">
+            <button
+              onClick={onCancelLeave}
+              className="px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors"
+              style={{ borderColor: '#e8e8e8', color: '#6b7280', backgroundColor: '#ffffff' }}
+            >
+              Stay
+            </button>
+            <button
+              onClick={onConfirmLeave}
+              className="px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
+              style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}
+            >
+              Leave
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Input card ── */}
       <div
@@ -259,7 +279,7 @@ export default function BrowseTab({ criteria, listings, location, onSave }) {
           <input
             type="text"
             value={urlOrLabel}
-            onChange={e => setUrlOrLabel(e.target.value)}
+            onChange={e => onBrowseStateChange({ urlOrLabel: e.target.value })}
             placeholder="Zillow URL or nickname"
             className="w-full rounded-lg border px-3 py-2 text-sm outline-none"
             style={{ borderColor: '#e8e8e8', color: '#1a1a2e' }}
@@ -278,7 +298,7 @@ export default function BrowseTab({ criteria, listings, location, onSave }) {
           </label>
           <textarea
             value={listingText}
-            onChange={e => setListingText(e.target.value)}
+            onChange={e => onBrowseStateChange({ listingText: e.target.value })}
             placeholder="Paste the full listing text here — description, amenities, price, location..."
             rows={6}
             className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-y"
@@ -305,7 +325,7 @@ export default function BrowseTab({ criteria, listings, location, onSave }) {
 
           {result && (
             <button
-              onClick={() => { setUrlOrLabel(''); setListingText(''); setResult(null); setError(null); setJustSaved(false); }}
+              onClick={() => onBrowseStateChange({ urlOrLabel: '', listingText: '', result: null, error: null, justSaved: false })}
               className="px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
               style={{ borderColor: '#e8e8e8', color: '#6b7280', backgroundColor: '#ffffff' }}
               title="Clear and start over"

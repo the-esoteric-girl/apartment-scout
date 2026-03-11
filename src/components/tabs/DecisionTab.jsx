@@ -18,7 +18,7 @@
  *   onPreloadConsumed — fn() called after preload is consumed into state
  *   onSave            — fn(listing) saves a new result listing
  */
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { buildSystemPrompt, buildDecisionPrompt, analyzeListing } from '../../utils/claude';
 import ScoreCard from '../ScoreCard';
@@ -371,7 +371,7 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
 // Helpers
 // ─────────────────────────────────────────────────────────────
 
-function createSlot(mode = 'new', savedListing = null) {
+export function createSlot(mode = 'new', savedListing = null) {
   return { id: uuidv4(), mode, savedListing, urlOrLabel: '', text: '' };
 }
 
@@ -651,17 +651,21 @@ function ResultCard({ result, isWinner, criteria, alreadySaved, isSaved, onSave 
 // ─────────────────────────────────────────────────────────────
 // Main component
 // ─────────────────────────────────────────────────────────────
-export default function DecisionTab({ criteria, listings, location, preloadListing, preloadMany, onPreloadConsumed, onSave }) {
-  const [slots, setSlots] = useState(() => [
-    createSlot('new'),
-    createSlot('new'),
-  ]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState(null);
-  const [error, setError] = useState(null);
-  const [resultsView, setResultsView] = useState('card'); // 'card' | 'table'
-  // Track which result slots (by index) have been saved this session
-  const [savedIndices, setSavedIndices] = useState(new Set());
+export default function DecisionTab({ criteria, listings, location, preloadListing, preloadMany, onPreloadConsumed, onSave, decisionState, onDecisionStateChange }) {
+  const { slots, isLoading, results, error, resultsView, savedIndices } = decisionState;
+
+  function setSlots(updater) {
+    if (typeof updater === 'function') {
+      onDecisionStateChange({ slots: updater(decisionState.slots) });
+    } else {
+      onDecisionStateChange({ slots: updater });
+    }
+  }
+  const setIsLoading  = v => onDecisionStateChange({ isLoading: v });
+  const setResults    = v => onDecisionStateChange({ results: v });
+  const setError      = v => onDecisionStateChange({ error: v });
+  const setResultsView = v => onDecisionStateChange({ resultsView: v });
+  const setSavedIndices = v => onDecisionStateChange({ savedIndices: typeof v === 'function' ? v(decisionState.savedIndices) : v });
 
   // Consume single preloaded listing into slot 0
   useEffect(() => {

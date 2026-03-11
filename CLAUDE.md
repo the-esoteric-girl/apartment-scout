@@ -192,3 +192,25 @@ vercel link   # link to your Vercel project
 | 4     | Decision Tab — side-by-side comparison          | ✅ Complete |
 | 5     | Settings Overlay — drag-to-reorder criteria     | ✅ Complete |
 | 6     | Polish — responsive, error states, edge cases   | Pending     |
+
+## Decision logging
+
+After completing any task, update /docs/decisions.md.
+Only log a decision if it meets one of these criteria:
+
+- It was a real choice between two or more options
+- It deviates from the default or most obvious approach
+- A future developer (or recruiter) would ask "why did you do it this way?"
+
+Do not log standard practice with no real alternative.
+Append only — never edit existing entries.
+
+Use this format exactly:
+
+### D[next number] — [short title]
+
+**Decision:** [what was decided, one sentence]
+
+**Why:** [reasoning, tradeoffs, what was considered and rejected]
+
+**Tradeoff:** [what you gave up by choosing this approach, or "None significant"]

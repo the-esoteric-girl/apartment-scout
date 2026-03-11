@@ -14,11 +14,11 @@
  * state. Lifting state to the common parent (App) is the React way.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getCriteria, getListings, getLocation, saveCriteria, saveListing, saveLocation, updateListing, deleteListing } from './utils/storage';
 import { recalculateForCriteria } from './utils/scoring';
 import BrowseTab from './components/tabs/BrowseTab';
-import DecisionTab from './components/tabs/DecisionTab';
+import DecisionTab, { createSlot } from './components/tabs/DecisionTab';
 import SavedTab from './components/tabs/SavedTab';
 import SettingsOverlay from './components/SettingsOverlay';
 
@@ -27,6 +27,30 @@ const TABS = [
   { id: 'decision', label: 'Decision', icon: '⚖️' },
   { id: 'saved',    label: 'Saved',    icon: '🏠' },
 ];
+
+// ── Persistent tab state defaults ────────────────────────────────────────────
+// These live in App so they survive tab switching within a session.
+
+const INITIAL_BROWSE_STATE = {
+  urlOrLabel: '',
+  listingText: '',
+  result: null,
+  error: null,
+  isLoading: false,
+  justSaved: false,
+};
+
+const INITIAL_SAVED_FILTERS = {
+  search: '',
+  sortBy: 'score',
+  statusFilter: 'all',
+  bedroomsFilter: 'any',
+  verdictFilter: 'any',
+  scoreFloor: 0,
+  maxRent: '',
+  neighborhoodSearch: '',
+  mustBeYes: new Set(),
+};
 
 export default function App() {
   // ── State ────────────────────────────────────────────────────────────────
@@ -39,10 +63,43 @@ export default function App() {
   const [listings, setListings] = useState(() => getListings());
   const [location, setLocation] = useState(() => getLocation());
 
+  // ── Session-persistent tab state ────────────────────────────────────────
+  const [browseState, setBrowseState] = useState(INITIAL_BROWSE_STATE);
+  const [savedFilters, setSavedFilters] = useState(INITIAL_SAVED_FILTERS);
+  const [savedCompareQueue, setSavedCompareQueue] = useState(new Set());
+  const [decisionState, setDecisionState] = useState(() => ({
+    slots: [createSlot('new'), createSlot('new')],
+    isLoading: false,
+    results: null,
+    error: null,
+    resultsView: 'card',
+    savedIndices: new Set(),
+  }));
+
   // When user clicks "Use in Decision Mode" from a saved listing (single)
   // or "Compare selected" from the Saved tab compare queue (array)
   const [decisionPreload, setDecisionPreload] = useState(null);
   const [decisionPreloadMany, setDecisionPreloadMany] = useState(null);
+
+  // ── Unsaved Browse guard ─────────────────────────────────────────────────
+  // pendingTab: the tab the user tried to switch to while Browse had unsaved content
+  const [pendingTab, setPendingTab] = useState(null);
+
+  const hasUnsavedBrowse =
+    browseState.listingText.trim().length > 0 &&
+    !browseState.justSaved &&
+    !listings.some(l => l.rawText === browseState.listingText);
+
+  // Native browser close/refresh warning
+  useEffect(() => {
+    if (!hasUnsavedBrowse) return;
+    function handler(e) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [hasUnsavedBrowse]);
 
   // ── Listing actions (passed down to child tabs) ───────────────────────────
   function handleSaveListing(listing) {
@@ -68,6 +125,40 @@ export default function App() {
   function handleCompareMany(listingsToCompare) {
     setDecisionPreloadMany(listingsToCompare);
     setActiveTab('decision');
+  }
+
+  // ── Browse state helpers ──────────────────────────────────────────────────
+  function updateBrowseState(changes) {
+    setBrowseState(prev => ({ ...prev, ...changes }));
+  }
+
+  // ── Decision state helpers ───────────────────────────────────────────────
+  function updateDecisionState(changes) {
+    setDecisionState(prev => ({ ...prev, ...changes }));
+  }
+
+  // ── Saved tab filter/queue helpers ───────────────────────────────────────
+  function setSavedFilter(key, valueOrUpdater) {
+    setSavedFilters(prev => ({
+      ...prev,
+      [key]: typeof valueOrUpdater === 'function' ? valueOrUpdater(prev[key]) : valueOrUpdater,
+    }));
+  }
+
+  function resetSavedFilters() {
+    setSavedFilters(INITIAL_SAVED_FILTERS);
+  }
+
+  function toggleSavedCompare(listingId) {
+    setSavedCompareQueue(prev => {
+      const next = new Set(prev);
+      next.has(listingId) ? next.delete(listingId) : next.add(listingId);
+      return next;
+    });
+  }
+
+  function clearSavedCompareQueue() {
+    setSavedCompareQueue(new Set());
   }
 
   // ── Criteria + location actions ───────────────────────────────────────────
@@ -129,7 +220,13 @@ export default function App() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    if (tab.id !== activeTab && activeTab === 'browse' && hasUnsavedBrowse) {
+                      setPendingTab(tab.id);
+                    } else {
+                      setActiveTab(tab.id);
+                    }
+                  }}
                   className="relative flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
                   style={{
                     color: isActive ? '#1a1a2e' : '#6b7280',
@@ -182,6 +279,11 @@ export default function App() {
             listings={listings}
             location={location}
             onSave={handleSaveListing}
+            browseState={browseState}
+            onBrowseStateChange={updateBrowseState}
+            showLeavePrompt={!!pendingTab}
+            onConfirmLeave={() => { setActiveTab(pendingTab); setPendingTab(null); }}
+            onCancelLeave={() => setPendingTab(null)}
           />
         )}
         {activeTab === 'decision' && (
@@ -193,6 +295,8 @@ export default function App() {
             preloadMany={decisionPreloadMany}
             onPreloadConsumed={() => { setDecisionPreload(null); setDecisionPreloadMany(null); }}
             onSave={handleSaveListing}
+            decisionState={decisionState}
+            onDecisionStateChange={updateDecisionState}
           />
         )}
         {activeTab === 'saved' && (
@@ -204,6 +308,12 @@ export default function App() {
             onUseInDecision={handleUseInDecision}
             onCompareMany={handleCompareMany}
             onGoToBrowse={() => setActiveTab('browse')}
+            filters={savedFilters}
+            onSetFilter={setSavedFilter}
+            onResetFilters={resetSavedFilters}
+            compareQueue={savedCompareQueue}
+            onToggleCompare={toggleSavedCompare}
+            onClearCompareQueue={clearSavedCompareQueue}
           />
         )}
       </main>

@@ -20,7 +20,7 @@
  *   onCompare         — fn(listing[]) → switches to Decision tab with multiple listings preloaded
  *   onGoToBrowse      — fn() → switches to Browse tab (used in empty state)
  */
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import EmptyState from '../EmptyState';
 import ListingCard from '../ListingCard';
 
@@ -309,46 +309,21 @@ function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, s
 // ─────────────────────────────────────────────────────────────
 // Main component
 // ─────────────────────────────────────────────────────────────
-const DEFAULT_FILTERS = {
-  search: '',
-  sortBy: 'score',
-  statusFilter: 'all',
-  bedroomsFilter: 'any',
-  verdictFilter: 'any',
-  scoreFloor: 0,
-  maxRent: '',
-  neighborhoodSearch: '',
-  mustBeYes: new Set(),
-};
 
-export default function SavedTab({ criteria, listings, onUpdate, onDelete, onUseInDecision, onCompareMany, onGoToBrowse }) {
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [compareQueue, setCompareQueue] = useState(new Set()); // Set of listing IDs
-
-  function setFilter(key, valueOrUpdater) {
-    setFilters(prev => ({
-      ...prev,
-      [key]: typeof valueOrUpdater === 'function' ? valueOrUpdater(prev[key]) : valueOrUpdater,
-    }));
-  }
-
-  function resetAllFilters() {
-    setFilters(DEFAULT_FILTERS);
-  }
-
+export default function SavedTab({
+  criteria, listings, onUpdate, onDelete, onUseInDecision, onCompareMany, onGoToBrowse,
+  filters, onSetFilter, onResetFilters,
+  compareQueue, onToggleCompare, onClearCompareQueue,
+}) {
   function toggleCompare(listing) {
-    setCompareQueue(prev => {
-      const next = new Set(prev);
-      next.has(listing.id) ? next.delete(listing.id) : next.add(listing.id);
-      return next;
-    });
+    onToggleCompare(listing.id);
   }
 
   function handleCompareSelected() {
     const selected = listings.filter(l => compareQueue.has(l.id));
     if (selected.length >= 2) {
       onCompareMany(selected);
-      setCompareQueue(new Set());
+      onClearCompareQueue();
     }
   }
 
@@ -434,8 +409,8 @@ export default function SavedTab({ criteria, listings, onUpdate, onDelete, onUse
 
       <FilterPanel
         filters={filters}
-        setFilter={setFilter}
-        resetAllFilters={resetAllFilters}
+        setFilter={onSetFilter}
+        resetAllFilters={onResetFilters}
         activeFilterCount={activeFilterCount}
         scoredCriteria={scoredCriteria}
       />
@@ -447,7 +422,7 @@ export default function SavedTab({ criteria, listings, onUpdate, onDelete, onUse
         >
           <p className="text-sm" style={{ color: '#9ca3af' }}>No listings match your filters.</p>
           <button
-            onClick={resetAllFilters}
+            onClick={onResetFilters}
             className="text-sm font-semibold px-4 py-1.5 rounded-lg border transition-colors"
             style={{ borderColor: '#e8e8e8', color: '#6b7280' }}
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
@@ -506,7 +481,7 @@ export default function SavedTab({ criteria, listings, onUpdate, onDelete, onUse
 
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => setCompareQueue(new Set())}
+              onClick={onClearCompareQueue}
               className="text-xs font-medium px-3 py-1.5 rounded-lg"
               style={{ color: '#9ca3af' }}
             >
