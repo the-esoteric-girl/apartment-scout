@@ -22,7 +22,350 @@ import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { buildSystemPrompt, buildDecisionPrompt, analyzeListing } from '../../utils/claude';
 import ScoreCard from '../ScoreCard';
+import ScorePill from '../ScorePill';
 import VerdictBadge from '../VerdictBadge';
+
+// ─────────────────────────────────────────────────────────────
+// DecisionTable — transposed criteria table for results
+// ─────────────────────────────────────────────────────────────
+
+const DT_LABEL_W = 160;
+const DT_COL_W   = 180;
+const DT_CELL_BORDER = { borderBottom: '1px solid #f3f4f6' };
+
+function dtStickyLabel(bg) {
+  return {
+    position: 'sticky',
+    left: 0,
+    backgroundColor: bg,
+    width: DT_LABEL_W,
+    minWidth: DT_LABEL_W,
+    zIndex: 1,
+    ...DT_CELL_BORDER,
+  };
+}
+
+function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIndices, onSave }) {
+  const listings    = results.listings ?? [];
+  const scoredCriteria = criteria.filter(c => !c.flagOnly);
+  const hasAnalysis = listings.some(l => l.strengths?.length || l.concerns?.length);
+  const allSaved    = !hasAnalysis; // all-saved mode produces no strengths/concerns
+
+  const colCount = listings.length + 1;
+
+  // ── shared row builders ────────────────────────────────────
+
+  function SummaryRow({ rowKey, label, renderCell }) {
+    return (
+      <tr key={rowKey} style={{ backgroundColor: '#fafafa' }}>
+        <td
+          className="px-4 py-3 text-xs font-semibold uppercase tracking-wide"
+          style={dtStickyLabel('#fafafa')}
+        >
+          <span style={{ color: '#9ca3af' }}>{label}</span>
+        </td>
+        {listings.map((l, i) => renderCell(l, i))}
+      </tr>
+    );
+  }
+
+  function SectionDivider({ label }) {
+    return (
+      <tr>
+        <td
+          colSpan={colCount}
+          className="px-4 py-1 text-xs font-semibold uppercase tracking-wide"
+          style={{
+            backgroundColor: '#f3f4f6',
+            color: '#9ca3af',
+            borderTop: '1px solid #e8e8e8',
+            borderBottom: '1px solid #e8e8e8',
+          }}
+        >
+          {label}
+        </td>
+      </tr>
+    );
+  }
+
+  const verdictRow = (key) => (
+    <SummaryRow
+      key={key}
+      rowKey={key}
+      label="Verdict"
+      renderCell={(l, i) => (
+        <td
+          key={i}
+          className="px-3 py-3 text-center"
+          style={{
+            minWidth: DT_COL_W,
+            borderLeft: '1px solid #f3f4f6',
+            backgroundColor: i === winnerIndex ? '#f0fafa' : 'transparent',
+            ...DT_CELL_BORDER,
+          }}
+        >
+          <VerdictBadge verdict={l.verdict} size="sm" />
+        </td>
+      )}
+    />
+  );
+
+  const scoreRow = (key) => (
+    <SummaryRow
+      key={key}
+      rowKey={key}
+      label="Score"
+      renderCell={(l, i) => (
+        <td
+          key={i}
+          className="px-3 py-3 text-center"
+          style={{
+            minWidth: DT_COL_W,
+            borderLeft: '1px solid #f3f4f6',
+            backgroundColor: i === winnerIndex ? '#f0fafa' : 'transparent',
+            ...DT_CELL_BORDER,
+          }}
+        >
+          <span className="text-2xl font-extrabold" style={{ color: '#1a1a2e' }}>
+            {Math.round(l.weighted_score)}
+          </span>
+          <span className="text-xs ml-0.5" style={{ color: '#9ca3af' }}>/100</span>
+        </td>
+      )}
+    />
+  );
+
+  return (
+    <div
+      className="rounded-xl border overflow-hidden"
+      style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
+    >
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+
+          {/* ── THEAD ── */}
+          <thead>
+            <tr style={{ borderBottom: '2px solid #e8e8e8' }}>
+              {/* Corner */}
+              <th
+                className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
+                style={{
+                  position: 'sticky',
+                  top: 0,
+                  left: 0,
+                  backgroundColor: '#ffffff',
+                  color: '#9ca3af',
+                  width: DT_LABEL_W,
+                  minWidth: DT_LABEL_W,
+                  zIndex: 3,
+                  borderBottom: '2px solid #e8e8e8',
+                }}
+              >
+                Criterion
+              </th>
+
+              {listings.map((l, i) => {
+                const isWinner = i === winnerIndex;
+                const saved    = isAlreadySaved(i) || savedIndices.has(i);
+                return (
+                  <th
+                    key={i}
+                    className="px-3 py-3 text-left align-top"
+                    style={{
+                      position: 'sticky',
+                      top: 0,
+                      minWidth: DT_COL_W,
+                      backgroundColor: isWinner ? '#e0f2f1' : '#ffffff',
+                      borderLeft: '1px solid #f3f4f6',
+                      borderBottom: '2px solid #e8e8e8',
+                      verticalAlign: 'top',
+                      zIndex: 2,
+                    }}
+                  >
+                    {isWinner && (
+                      <p className="text-xs font-bold mb-1" style={{ color: '#2A7F7F' }}>✦ Top Pick</p>
+                    )}
+                    <p className="text-sm font-bold leading-tight" style={{ color: '#1a1a2e' }}>
+                      {l.name}
+                    </p>
+                    {(l.address || l.price) && (
+                      <p className="text-xs mt-0.5 truncate" style={{ color: '#6b7280' }}>
+                        {[l.address, l.price].filter(Boolean).join(' · ')}
+                      </p>
+                    )}
+                    <button
+                      onClick={() => !saved && onSave(l, i)}
+                      disabled={saved}
+                      className="mt-2 text-xs font-semibold px-2.5 py-1 rounded border transition-colors"
+                      style={
+                        saved
+                          ? { backgroundColor: '#f3f4f6', color: '#9ca3af', borderColor: '#e8e8e8', cursor: 'default' }
+                          : { backgroundColor: '#ffffff', color: '#2A7F7F', borderColor: '#2A7F7F', cursor: 'pointer' }
+                      }
+                    >
+                      {saved ? 'Saved ✓' : 'Save'}
+                    </button>
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+
+          {/* ── TBODY ── */}
+          <tbody>
+
+            {/* Verdict + Score (top) */}
+            {verdictRow('verdict-top')}
+            {scoreRow('score-top')}
+
+            {/* Scored criteria */}
+            {scoredCriteria.length > 0 && (
+              <>
+                <SectionDivider label="Criteria" />
+                {scoredCriteria.map((criterion, index) => {
+                  const anyDQ =
+                    criterion.isDisqualifier &&
+                    listings.some(l => (l.scores?.[criterion.key] ?? 'unclear') === 'no');
+                  const rowBg = anyDQ ? '#fff5f5' : (index % 2 === 0 ? '#ffffff' : '#fafafa');
+
+                  return (
+                    <tr key={criterion.key} style={{ backgroundColor: rowBg }}>
+                      <td
+                        className="px-4 py-2.5 align-middle"
+                        style={dtStickyLabel(rowBg)}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-semibold w-5 shrink-0 text-right" style={{ color: '#9ca3af' }}>
+                            #{index + 1}
+                          </span>
+                          <span className="text-sm font-medium leading-snug" style={{ color: '#1a1a2e' }}>
+                            {criterion.label}
+                          </span>
+                          {criterion.isDisqualifier && (
+                            <span
+                              className="text-xs px-1 py-0.5 rounded font-semibold shrink-0"
+                              style={{ backgroundColor: '#ffebee', color: '#ef5350' }}
+                            >
+                              must
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      {listings.map((l, i) => {
+                        const score = l.scores?.[criterion.key] ?? 'unclear';
+                        const extra =
+                          criterion.key === 'price'      ? l.price       :
+                          criterion.key === 'green_lake' ? l.neighborhood :
+                          null;
+                        return (
+                          <td
+                            key={i}
+                            className="px-3 py-2.5 text-center align-middle"
+                            style={{
+                              minWidth: DT_COL_W,
+                              borderLeft: '1px solid #f3f4f6',
+                              backgroundColor: i === winnerIndex ? '#f5fffe' : 'transparent',
+                              ...DT_CELL_BORDER,
+                            }}
+                          >
+                            <ScorePill score={score} />
+                            {extra && (
+                              <div className="text-xs mt-1 truncate mx-auto" style={{ color: '#6b7280', maxWidth: DT_COL_W - 24 }}>
+                                {extra}
+                              </div>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </>
+            )}
+
+            {/* Analysis: Strengths / Concerns */}
+            <SectionDivider label="Analysis" />
+            {allSaved ? (
+              <tr>
+                <td colSpan={colCount} className="px-4 py-3">
+                  <span className="text-xs italic" style={{ color: '#9ca3af' }}>
+                    Strengths and concerns are not available when comparing saved listings — Claude was not called.
+                  </span>
+                </td>
+              </tr>
+            ) : (
+              <>
+                <tr style={{ backgroundColor: '#ffffff' }}>
+                  <td
+                    className="px-4 py-2.5 align-top"
+                    style={dtStickyLabel('#ffffff')}
+                  >
+                    <span className="text-xs font-semibold uppercase tracking-wide pl-6" style={{ color: '#43a047' }}>
+                      Strengths
+                    </span>
+                  </td>
+                  {listings.map((l, i) => (
+                    <td
+                      key={i}
+                      className="px-3 py-2.5 align-top text-xs"
+                      style={{ minWidth: DT_COL_W, borderLeft: '1px solid #f3f4f6', backgroundColor: i === winnerIndex ? '#f5fffe' : 'transparent', ...DT_CELL_BORDER }}
+                    >
+                      {l.strengths?.length ? (
+                        <ul className="flex flex-col gap-0.5">
+                          {l.strengths.map((s, j) => (
+                            <li key={j} className="flex gap-1 items-start" style={{ color: '#374151' }}>
+                              <span style={{ color: '#43a047' }}>✓</span> {s}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <span style={{ color: '#9ca3af' }}>—</span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+                <tr style={{ backgroundColor: '#fafafa' }}>
+                  <td
+                    className="px-4 py-2.5 align-top"
+                    style={dtStickyLabel('#fafafa')}
+                  >
+                    <span className="text-xs font-semibold uppercase tracking-wide pl-6" style={{ color: '#ef5350' }}>
+                      Concerns
+                    </span>
+                  </td>
+                  {listings.map((l, i) => (
+                    <td
+                      key={i}
+                      className="px-3 py-2.5 align-top text-xs"
+                      style={{ minWidth: DT_COL_W, borderLeft: '1px solid #f3f4f6', backgroundColor: i === winnerIndex ? '#f5fffe' : 'transparent', ...DT_CELL_BORDER }}
+                    >
+                      {l.concerns?.length ? (
+                        <ul className="flex flex-col gap-0.5">
+                          {l.concerns.map((c, j) => (
+                            <li key={j} className="flex gap-1 items-start" style={{ color: '#374151' }}>
+                              <span style={{ color: '#ef5350' }}>✗</span> {c}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <span style={{ color: '#9ca3af' }}>—</span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              </>
+            )}
+
+            {/* Verdict + Score (bottom) */}
+            {verdictRow('verdict-bottom')}
+            {scoreRow('score-bottom')}
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 // ─────────────────────────────────────────────────────────────
 // Helpers
@@ -316,6 +659,7 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
+  const [resultsView, setResultsView] = useState('card'); // 'card' | 'table'
   // Track which result slots (by index) have been saved this session
   const [savedIndices, setSavedIndices] = useState(new Set());
 
@@ -578,23 +922,65 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
             </div>
           )}
 
-          {/* Cards grid — responsive: 1 col on mobile, 2 on sm+ */}
-          <div className="grid gap-4 mb-6 grid-cols-1 sm:grid-cols-2">
-            {results.listings?.map((result, i) => (
-              <ResultCard
-                key={i}
-                result={result}
-                isWinner={i === winnerIndex}
-                criteria={criteria}
-                alreadySaved={isAlreadySaved(i)}
-                isSaved={savedIndices.has(i)}
-                onSave={() => handleSaveResult(result, i)}
-              />
-            ))}
+          {/* View toggle */}
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-semibold" style={{ color: '#1a1a2e' }}>
+              Results
+            </p>
+            <div
+              className="flex rounded-lg border overflow-hidden"
+              style={{ borderColor: '#e8e8e8' }}
+            >
+              {[{ mode: 'card', label: 'Cards' }, { mode: 'table', label: 'Table' }].map(({ mode, label }) => (
+                <button
+                  key={mode}
+                  onClick={() => setResultsView(mode)}
+                  className="px-3 py-1.5 text-xs font-semibold transition-colors"
+                  style={
+                    resultsView === mode
+                      ? { backgroundColor: '#1a1a2e', color: '#ffffff' }
+                      : { backgroundColor: '#ffffff', color: '#9ca3af' }
+                  }
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Save all button — only for new slots not yet saved */}
-          {results.listings?.some((_, i) => !isAlreadySaved(i) && !savedIndices.has(i)) && (
+          {/* Cards view */}
+          {resultsView === 'card' && (
+            <div className="grid gap-4 mb-6 grid-cols-1 sm:grid-cols-2">
+              {results.listings?.map((result, i) => (
+                <ResultCard
+                  key={i}
+                  result={result}
+                  isWinner={i === winnerIndex}
+                  criteria={criteria}
+                  alreadySaved={isAlreadySaved(i)}
+                  isSaved={savedIndices.has(i)}
+                  onSave={() => handleSaveResult(result, i)}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Table view */}
+          {resultsView === 'table' && (
+            <div className="mb-6">
+              <DecisionTable
+                results={results}
+                criteria={criteria}
+                winnerIndex={winnerIndex}
+                isAlreadySaved={isAlreadySaved}
+                savedIndices={savedIndices}
+                onSave={handleSaveResult}
+              />
+            </div>
+          )}
+
+          {/* Save all button — only for new slots not yet saved, card view only */}
+          {resultsView === 'card' && results.listings?.some((_, i) => !isAlreadySaved(i) && !savedIndices.has(i)) && (
             <div className="flex justify-end mb-4">
               <button
                 onClick={() => {
