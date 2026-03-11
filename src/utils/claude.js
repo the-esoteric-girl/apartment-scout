@@ -18,12 +18,13 @@ import { CRITERION_DESCRIPTIONS } from '../constants/defaultCriteria';
  * Build the system prompt Claude receives before every analysis.
  *
  * We generate this fresh on each call so it always reflects the user's
- * current criteria (order, weights, disqualifiers, custom names).
+ * current criteria (order, weights, disqualifiers, custom names) and location.
  *
- * @param {Array} criteria — the current criteria array from localStorage
+ * @param {Array}  criteria — the current criteria array from localStorage
+ * @param {string} location — target neighborhood (e.g. "Capitol Hill, Seattle")
  * @returns {string} — the full system prompt
  */
-export function buildSystemPrompt(criteria) {
+export function buildSystemPrompt(criteria, location = 'Green Lake, Seattle') {
   const weighted = calculateWeights(criteria);
   const scoredCriteria = weighted.filter(c => !c.flagOnly);
   const flagCriteria = criteria.filter(c => c.flagOnly);
@@ -32,8 +33,14 @@ export function buildSystemPrompt(criteria) {
   const scoringLines = scoredCriteria.map(c => {
     const pct = Math.round(c.weight);
     const disqualifierNote = c.isDisqualifier ? ', HARD DISQUALIFIER' : '';
-    // Use our known description if it exists, otherwise fall back to the label
-    const description = CRITERION_DESCRIPTIONS[c.key] ?? c.label;
+    // The location criterion description is generated dynamically from the user's location.
+    // All other criteria use CRITERION_DESCRIPTIONS, falling back to the label.
+    let description;
+    if (c.key === 'green_lake') {
+      description = `Located within reasonable distance of ${location}`;
+    } else {
+      description = CRITERION_DESCRIPTIONS[c.key] ?? c.label;
+    }
     return `- ${c.key} (${pct}%${disqualifierNote}): ${description}`;
   });
 
@@ -55,7 +62,7 @@ export function buildSystemPrompt(criteria) {
     }
   });
 
-  return `You are an apartment research assistant helping a junior UX designer find housing in Seattle near Green Lake.
+  return `You are an apartment research assistant helping a junior UX designer find housing near ${location}.
 
 Analyze the listing(s) provided and respond ONLY with valid JSON. No markdown, no explanation, no code fences.
 

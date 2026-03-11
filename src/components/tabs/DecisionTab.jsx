@@ -6,9 +6,10 @@
  * returning strengths/concerns/winner/tradeoff for each listing.
  *
  * Architectural note (decision log #2):
- *   Saved listings contribute their rawText to the prompt so Claude has real
- *   data. We do NOT re-run individual Browse analysis on saved listings —
- *   this is a single decision-mode call across all slots.
+ *   When ALL slots are saved listings, stored scores/verdict are used directly
+ *   and Claude is NOT called. When at least one slot is new (pasted text),
+ *   Claude is called; saved slots contribute a brief score summary (not rawText)
+ *   to keep the prompt small.
  *
  * Props:
  *   criteria          — current criteria array
@@ -307,7 +308,7 @@ function ResultCard({ result, isWinner, criteria, alreadySaved, isSaved, onSave 
 // ─────────────────────────────────────────────────────────────
 // Main component
 // ─────────────────────────────────────────────────────────────
-export default function DecisionTab({ criteria, listings, preloadListing, onPreloadConsumed, onSave }) {
+export default function DecisionTab({ criteria, listings, location, preloadListing, onPreloadConsumed, onSave }) {
   const [slots, setSlots] = useState(() => [
     createSlot('new'),
     createSlot('new'),
@@ -367,18 +368,54 @@ export default function DecisionTab({ criteria, listings, preloadListing, onPrel
     setSavedIndices(new Set());
 
     try {
-      // Build prompt slots — saved listings contribute their rawText
+      // Decision D2: if every slot is a saved listing, use stored scores — no API call.
+      const allSaved = slots.every(s => s.mode === 'saved' && s.savedListing);
+
+      if (allSaved) {
+        const listingsFromStored = slots.map(slot => ({
+          name: slot.savedListing.name,
+          address: slot.savedListing.address || '',
+          price: slot.savedListing.price || '',
+          scores: slot.savedListing.scores,
+          weighted_score: slot.savedListing.weighted_score,
+          verdict: slot.savedListing.verdict,
+          strengths: [],
+          concerns: [],
+        }));
+
+        // Pick winner by highest weighted_score
+        let winnerIdx = 0;
+        listingsFromStored.forEach((l, i) => {
+          if (l.weighted_score > listingsFromStored[winnerIdx].weighted_score) winnerIdx = i;
+        });
+
+        setResults({
+          mode: 'decision',
+          listings: listingsFromStored,
+          winner: winnerIdx + 1,
+          winner_reason: null,
+          tradeoff_note: null,
+        });
+        return;
+      }
+
+      // Mixed mode (at least one new listing) — call Claude.
+      // For saved slots, pass a brief summary instead of rawText to avoid oversized prompts.
       const promptSlots = slots.map(slot => {
         if (slot.mode === 'saved' && slot.savedListing) {
+          const l = slot.savedListing;
+          const scoreLines = Object.entries(l.scores || {})
+            .map(([k, v]) => `${k}: ${v}`)
+            .join(', ');
           return {
-            urlOrLabel: slot.savedListing.name,
-            text: slot.savedListing.rawText || `Saved listing: ${slot.savedListing.name} at ${slot.savedListing.price}`,
+            urlOrLabel: l.name,
+            text: `[Previously scored listing]\nName: ${l.name}\nPrice: ${l.price || 'unknown'}\nAddress: ${l.address || 'unknown'}\nScores: ${scoreLines}`,
           };
         }
         return { urlOrLabel: slot.urlOrLabel, text: slot.text };
       });
 
-      const system = buildSystemPrompt(criteria);
+      const system = buildSystemPrompt(criteria, location);
       const userPrompt = buildDecisionPrompt(promptSlots);
       const data = await analyzeListing({ system, userPrompt });
       setResults(data);

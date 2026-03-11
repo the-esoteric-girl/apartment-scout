@@ -15,7 +15,7 @@
  */
 
 import { useState } from 'react';
-import { getCriteria, getListings, saveCriteria, saveListing, updateListing, deleteListing } from './utils/storage';
+import { getCriteria, getListings, getLocation, saveCriteria, saveListing, saveLocation, updateListing, deleteListing } from './utils/storage';
 import { recalculateForCriteria } from './utils/scoring';
 import BrowseTab from './components/tabs/BrowseTab';
 import DecisionTab from './components/tabs/DecisionTab';
@@ -37,6 +37,7 @@ export default function App() {
   // This pattern (lazy initial state) avoids reading localStorage on every render
   const [criteria, setCriteria] = useState(() => getCriteria());
   const [listings, setListings] = useState(() => getListings());
+  const [location, setLocation] = useState(() => getLocation());
 
   // When user clicks "Use in Decision Mode" from a saved listing
   const [decisionPreload, setDecisionPreload] = useState(null);
@@ -62,15 +63,29 @@ export default function App() {
     setActiveTab('decision');
   }
 
-  // ── Criteria actions ──────────────────────────────────────────────────────
-  function handleSaveCriteria(newCriteria) {
-    saveCriteria(newCriteria);
-    setCriteria(newCriteria);
+  // ── Criteria + location actions ───────────────────────────────────────────
+  // Called by SettingsOverlay with both the new criteria and new location.
+  // Location change also updates the 'green_lake' criterion label to match.
+  function handleSaveSettings(newCriteria, newLocation) {
+    // Derive a short display name from the location for the criterion label
+    // e.g. "Capitol Hill, Seattle" → "Capitol Hill"
+    const shortName = newLocation.split(',')[0].trim();
+
+    // Update the green_lake criterion label to reflect the new location
+    const updatedCriteria = newCriteria.map(c =>
+      c.key === 'green_lake' ? { ...c, label: `Near ${shortName}` } : c
+    );
+
+    saveCriteria(updatedCriteria);
+    setCriteria(updatedCriteria);
+
+    saveLocation(newLocation);
+    setLocation(newLocation);
 
     // When criteria change, recalculate scores for all saved listings.
     // The raw yes/no/unclear scores stay the same — only the weights and
     // verdicts are recalculated. Missing scores (new criteria) default to "unclear".
-    const updatedListings = listings.map(l => recalculateForCriteria(l, newCriteria));
+    const updatedListings = listings.map(l => recalculateForCriteria(l, updatedCriteria));
     updatedListings.forEach(l => updateListing(l.id, {
       weighted_score: l.weighted_score,
       verdict: l.verdict,
@@ -157,6 +172,7 @@ export default function App() {
           <BrowseTab
             criteria={criteria}
             listings={listings}
+            location={location}
             onSave={handleSaveListing}
           />
         )}
@@ -164,6 +180,7 @@ export default function App() {
           <DecisionTab
             criteria={criteria}
             listings={listings}
+            location={location}
             preloadListing={decisionPreload}
             onPreloadConsumed={() => setDecisionPreload(null)}
             onSave={handleSaveListing}
@@ -185,7 +202,8 @@ export default function App() {
       {showSettings && (
         <SettingsOverlay
           criteria={criteria}
-          onSave={handleSaveCriteria}
+          location={location}
+          onSave={handleSaveSettings}
           onClose={() => setShowSettings(false)}
         />
       )}

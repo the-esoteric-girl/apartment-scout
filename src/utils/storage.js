@@ -5,15 +5,18 @@
  * Keeping I/O in one place means if we ever swap to a different
  * storage backend (IndexedDB, a real API), we only change this file.
  *
- * Two localStorage keys:
+ * localStorage keys:
  *   apartment_scout_listings  — array of saved listing objects
  *   apartment_scout_criteria  — array of criteria in priority order
+ *   apartment_scout_location  — target neighborhood string
  */
 
 import { DEFAULT_CRITERIA } from '../constants/defaultCriteria';
 
-const LISTINGS_KEY = 'apartment_scout_listings';
-const CRITERIA_KEY = 'apartment_scout_criteria';
+const LISTINGS_KEY  = 'apartment_scout_listings';
+const CRITERIA_KEY  = 'apartment_scout_criteria';
+const LOCATION_KEY  = 'apartment_scout_location';
+const DEFAULT_LOCATION = 'Green Lake, Seattle';
 
 // ─────────────────────────────────────────
 // Listings
@@ -92,4 +95,22 @@ export function saveCriteria(criteria) {
 export function resetCriteria() {
   localStorage.setItem(CRITERIA_KEY, JSON.stringify(DEFAULT_CRITERIA));
   return DEFAULT_CRITERIA;
+}
+
+// ─────────────────────────────────────────
+// Location
+// ─────────────────────────────────────────
+
+/** Read the saved target neighborhood. Falls back to Green Lake, Seattle. */
+export function getLocation() {
+  try {
+    return localStorage.getItem(LOCATION_KEY) || DEFAULT_LOCATION;
+  } catch {
+    return DEFAULT_LOCATION;
+  }
+}
+
+/** Save the target neighborhood string. */
+export function saveLocation(location) {
+  localStorage.setItem(LOCATION_KEY, location);
 }

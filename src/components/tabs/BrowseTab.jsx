@@ -179,7 +179,7 @@ function ResultSection({ result, criteria, isSaved, onSave }) {
 // Main component
 // ─────────────────────────────────────────────────────────────
 
-export default function BrowseTab({ criteria, listings, onSave }) {
+export default function BrowseTab({ criteria, listings, location, onSave }) {
   const [urlOrLabel, setUrlOrLabel] = useState('');
   const [listingText, setListingText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -203,7 +203,7 @@ export default function BrowseTab({ criteria, listings, onSave }) {
     setJustSaved(false);
 
     try {
-      const system = buildSystemPrompt(criteria);
+      const system = buildSystemPrompt(criteria, location);
       const userPrompt = buildBrowsePrompt(listingText, urlOrLabel);
       const data = await analyzeListing({ system, userPrompt });
       setResult(data);
