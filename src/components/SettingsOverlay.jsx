@@ -201,8 +201,6 @@ function LibraryPicker({ activeCriteriaKeys, onAdd }) {
 export default function SettingsOverlay({ criteria, location, onSave, onClose }) {
   const [localCriteria, setLocalCriteria] = useState(criteria);
   const [localLocation, setLocalLocation] = useState(location);
-  const [editingKey, setEditingKey] = useState(null);
-  const [editingLabel, setEditingLabel] = useState('');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
   const panelRef = useRef(null);
@@ -229,23 +227,10 @@ export default function SettingsOverlay({ criteria, location, onSave, onClose })
   }
 
   // ── Inline rename ────────────────────────────────────────────────────────
-  function handleStartEdit(criterion) {
-    setEditingKey(criterion.key);
-    setEditingLabel(criterion.label);
-  }
-
-  function handleCommitEdit() {
-    const trimmed = editingLabel.trim();
-    if (trimmed) {
-      setLocalCriteria(prev =>
-        prev.map(c => (c.key === editingKey ? { ...c, label: trimmed } : c))
-      );
-    }
-    setEditingKey(null);
-  }
-
-  function handleCancelEdit() {
-    setEditingKey(null);
+  function handleRename(key, label) {
+    setLocalCriteria(prev =>
+      prev.map(c => (c.key === key ? { ...c, label } : c))
+    );
   }
 
   // ── Must-have toggle ─────────────────────────────────────────────────────
@@ -259,7 +244,6 @@ export default function SettingsOverlay({ criteria, location, onSave, onClose })
   function handleDelete(key) {
     const scored = localCriteria.filter(c => !c.flagOnly);
     if (scored.length <= 1) return; // always keep at least one
-    if (editingKey === key) setEditingKey(null);
     setLocalCriteria(prev => prev.filter(c => c.key !== key));
   }
 
@@ -282,7 +266,6 @@ export default function SettingsOverlay({ criteria, location, onSave, onClose })
   function handleReset() {
     setLocalCriteria(DEFAULT_CRITERIA);
     setLocalLocation('Green Lake, Seattle');
-    setEditingKey(null);
     setShowResetConfirm(false);
     setShowLibrary(false);
   }
@@ -358,13 +341,8 @@ export default function SettingsOverlay({ criteria, location, onSave, onClose })
 
             <DraggableCriteriaList
               criteria={localCriteria}
-              editingKey={editingKey}
-              editingLabel={editingLabel}
               onReorder={handleReorder}
-              onStartEdit={handleStartEdit}
-              onEditChange={setEditingLabel}
-              onCommitEdit={handleCommitEdit}
-              onCancelEdit={handleCancelEdit}
+              onRename={handleRename}
               onToggleDisqualifier={handleToggleDisqualifier}
               onDelete={handleDelete}
             />

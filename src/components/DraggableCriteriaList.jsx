@@ -8,6 +8,7 @@
  * Flag-only criteria are rendered separately in SettingsOverlay.
  */
 
+import { useState } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -156,16 +157,14 @@ function SortableRow({
 
 export default function DraggableCriteriaList({
   criteria,
-  editingKey,
-  editingLabel,
   onReorder,
-  onStartEdit,
-  onEditChange,
-  onCommitEdit,
-  onCancelEdit,
+  onRename,
   onToggleDisqualifier,
   onDelete,
 }) {
+  const [editingKey, setEditingKey] = useState(null);
+  const [editingLabel, setEditingLabel] = useState('');
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -174,6 +173,28 @@ export default function DraggableCriteriaList({
   // Only scored criteria are draggable
   const scoredCriteria = criteria.filter(c => !c.flagOnly);
   const canDelete = scoredCriteria.length > 1;
+
+  function handleStartEdit(criterion) {
+    setEditingKey(criterion.key);
+    setEditingLabel(criterion.label);
+  }
+
+  function handleCommitEdit() {
+    const trimmed = editingLabel.trim();
+    if (trimmed && editingKey) {
+      onRename(editingKey, trimmed);
+    }
+    setEditingKey(null);
+  }
+
+  function handleCancelEdit() {
+    setEditingKey(null);
+  }
+
+  function handleDelete(key) {
+    if (editingKey === key) setEditingKey(null);
+    onDelete(key);
+  }
 
   function handleDragEnd(event) {
     const { active, over } = event;
@@ -203,12 +224,12 @@ export default function DraggableCriteriaList({
               editingKey={editingKey}
               editingLabel={editingLabel}
               canDelete={canDelete}
-              onStartEdit={onStartEdit}
-              onEditChange={onEditChange}
-              onCommitEdit={onCommitEdit}
-              onCancelEdit={onCancelEdit}
+              onStartEdit={handleStartEdit}
+              onEditChange={setEditingLabel}
+              onCommitEdit={handleCommitEdit}
+              onCancelEdit={handleCancelEdit}
               onToggleDisqualifier={onToggleDisqualifier}
-              onDelete={onDelete}
+              onDelete={handleDelete}
             />
           ))}
         </div>
