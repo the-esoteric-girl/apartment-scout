@@ -54,21 +54,21 @@ export function updateListing(id, changes) {
   const listings = getListings().map(l =>
     l.id === id ? { ...l, ...changes } : l
   );
-  localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
+  try {
+    localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
+  } catch {
+    // ignore write errors (e.g. private browsing quota limits)
+  }
 }
 
 /** Remove a listing by id. */
 export function deleteListing(id) {
   const listings = getListings().filter(l => l.id !== id);
-  localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
-}
-
-/**
- * Check if a listing with the same raw text is already saved.
- * Used to show "Already saved ✓" state on the Save button.
- */
-export function isListingSaved(rawText) {
-  return getListings().some(l => l.rawText === rawText);
+  try {
+    localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
+  } catch {
+    // ignore write errors
+  }
 }
 
 // ─────────────────────────────────────────

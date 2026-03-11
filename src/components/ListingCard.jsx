@@ -179,7 +179,7 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
             {/* Address + price — editable only when blank */}
             <div className="flex flex-wrap items-center gap-x-1.5 mt-0.5 text-sm" style={{ color: '#6b7280' }}>
               {/* Address */}
-              {listing.address ? (
+              {listing.address && /\d/.test(listing.address) ? (
                 <span className="truncate max-w-[200px]">{listing.address}</span>
               ) : isEditingAddress ? (
                 <input
@@ -194,12 +194,12 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
                 />
               ) : (
                 <button
-                  onClick={() => { setIsEditingAddress(true); setEditAddress(''); }}
+                  onClick={() => { setIsEditingAddress(true); setEditAddress(listing.address ?? ''); }}
                   className="hover:underline decoration-dashed"
-                  style={{ color: '#d1d5db' }}
-                  title="Add address"
+                  style={{ color: listing.address ? '#6b7280' : '#d1d5db' }}
+                  title={listing.address ? 'Click to edit address' : 'Add address'}
                 >
-                  Add address
+                  {listing.address || 'Add address'}
                 </button>
               )}
 
