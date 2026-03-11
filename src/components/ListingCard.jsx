@@ -66,33 +66,59 @@ function formatDate(isoString) {
 // ─────────────────────────────────────────────────────────────
 export default function ListingCard({ listing, criteria, onUpdate, onDelete, onUseInDecision, onAddToCompare, inCompareQueue }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [editName, setEditName] = useState(listing.name);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [localNotes, setLocalNotes] = useState(listing.notes ?? '');
-  const nameInputRef = useRef(null);
 
-  // Focus name input when editing starts
-  useEffect(() => {
-    if (isEditingName) nameInputRef.current?.focus();
-  }, [isEditingName]);
+  // Inline-edit state: name, address, price
+  const [isEditingName, setIsEditingName]       = useState(false);
+  const [editName, setEditName]                 = useState(listing.name);
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [editAddress, setEditAddress]           = useState(listing.address ?? '');
+  const [isEditingPrice, setIsEditingPrice]     = useState(false);
+  const [editPrice, setEditPrice]               = useState(listing.price ?? '');
 
-  function commitNameEdit() {
-    const trimmed = editName.trim();
-    if (trimmed && trimmed !== listing.name) {
-      onUpdate(listing.id, { name: trimmed });
-    } else {
-      setEditName(listing.name); // revert if empty or unchanged
-    }
-    setIsEditingName(false);
+  const nameInputRef    = useRef(null);
+  const addressInputRef = useRef(null);
+  const priceInputRef   = useRef(null);
+
+  // Focus inputs when editing starts
+  useEffect(() => { if (isEditingName)    nameInputRef.current?.focus();    }, [isEditingName]);
+  useEffect(() => { if (isEditingAddress) addressInputRef.current?.focus(); }, [isEditingAddress]);
+  useEffect(() => { if (isEditingPrice)   priceInputRef.current?.focus();   }, [isEditingPrice]);
+
+  // Generic commit/cancel helpers
+  function commitField(field, value, original, setEditing, resetValue) {
+    const trimmed = typeof value === 'string' ? value.trim() : value;
+    if (trimmed !== original) onUpdate(listing.id, { [field]: trimmed });
+    else resetValue(original);
+    setEditing(false);
   }
 
+  function handleFieldKeyDown(e, commit, cancel) {
+    if (e.key === 'Enter') commit();
+    if (e.key === 'Escape') cancel();
+  }
+
+  // Per-field helpers
+  function commitNameEdit() {
+    commitField('name', editName, listing.name, setIsEditingName, setEditName);
+  }
   function handleNameKeyDown(e) {
-    if (e.key === 'Enter') commitNameEdit();
-    if (e.key === 'Escape') {
-      setEditName(listing.name);
-      setIsEditingName(false);
-    }
+    handleFieldKeyDown(e, commitNameEdit, () => { setEditName(listing.name); setIsEditingName(false); });
+  }
+
+  function commitAddressEdit() {
+    commitField('address', editAddress, listing.address ?? '', setIsEditingAddress, setEditAddress);
+  }
+  function handleAddressKeyDown(e) {
+    handleFieldKeyDown(e, commitAddressEdit, () => { setEditAddress(listing.address ?? ''); setIsEditingAddress(false); });
+  }
+
+  function commitPriceEdit() {
+    commitField('price', editPrice, listing.price ?? '', setIsEditingPrice, setEditPrice);
+  }
+  function handlePriceKeyDown(e) {
+    handleFieldKeyDown(e, commitPriceEdit, () => { setEditPrice(listing.price ?? ''); setIsEditingPrice(false); });
   }
 
   function handleStatusChange(status) {
@@ -150,10 +176,63 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
               </button>
             )}
 
-            {/* Address + price */}
-            <p className="text-sm mt-0.5 truncate" style={{ color: '#6b7280' }}>
-              {[listing.address, listing.price].filter(Boolean).join(' · ')}
-            </p>
+            {/* Address + price — editable only when blank */}
+            <div className="flex flex-wrap items-center gap-x-1.5 mt-0.5 text-sm" style={{ color: '#6b7280' }}>
+              {/* Address */}
+              {listing.address ? (
+                <span className="truncate max-w-[200px]">{listing.address}</span>
+              ) : isEditingAddress ? (
+                <input
+                  ref={addressInputRef}
+                  value={editAddress}
+                  onChange={e => setEditAddress(e.target.value)}
+                  onBlur={commitAddressEdit}
+                  onKeyDown={handleAddressKeyDown}
+                  placeholder="Address"
+                  className="rounded px-1 -mx-1 outline-none border-b"
+                  style={{ color: '#6b7280', borderBottomColor: '#2A7F7F', backgroundColor: 'transparent', minWidth: '120px' }}
+                />
+              ) : (
+                <button
+                  onClick={() => { setIsEditingAddress(true); setEditAddress(''); }}
+                  className="hover:underline decoration-dashed"
+                  style={{ color: '#d1d5db' }}
+                  title="Add address"
+                >
+                  Add address
+                </button>
+              )}
+
+              {/* Separator */}
+              {(listing.address || isEditingAddress) && (listing.price || isEditingPrice) && (
+                <span aria-hidden="true">·</span>
+              )}
+
+              {/* Price */}
+              {listing.price ? (
+                <span>{listing.price}</span>
+              ) : isEditingPrice ? (
+                <input
+                  ref={priceInputRef}
+                  value={editPrice}
+                  onChange={e => setEditPrice(e.target.value)}
+                  onBlur={commitPriceEdit}
+                  onKeyDown={handlePriceKeyDown}
+                  placeholder="Price"
+                  className="rounded px-1 -mx-1 outline-none border-b"
+                  style={{ color: '#6b7280', borderBottomColor: '#2A7F7F', backgroundColor: 'transparent', minWidth: '80px' }}
+                />
+              ) : (
+                <button
+                  onClick={() => { setIsEditingPrice(true); setEditPrice(''); }}
+                  className="hover:underline decoration-dashed"
+                  style={{ color: '#d1d5db' }}
+                  title="Add price"
+                >
+                  Add price
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Score + verdict */}
