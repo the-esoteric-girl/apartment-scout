@@ -142,20 +142,10 @@ export default function App() {
   }
 
   // ── Criteria + location actions ───────────────────────────────────────────
-  // Called by SettingsOverlay with both the new criteria and new location.
-  // Location change also updates the 'green_lake' criterion label to match.
+  // Called by SettingsOverlay with already-correct criteria (label updates applied before calling).
   function handleSaveSettings(newCriteria, newLocation) {
-    // Derive a short display name from the location for the criterion label
-    // e.g. "Capitol Hill, Seattle" → "Capitol Hill"
-    const shortName = newLocation.split(',')[0].trim();
-
-    // Update the green_lake criterion label to reflect the new location
-    const updatedCriteria = newCriteria.map(c =>
-      c.key === 'green_lake' ? { ...c, label: `Near ${shortName}` } : c
-    );
-
-    saveCriteria(updatedCriteria);
-    setCriteria(updatedCriteria);
+    saveCriteria(newCriteria);
+    setCriteria(newCriteria);
 
     saveLocation(newLocation);
     setLocation(newLocation);
@@ -163,7 +153,7 @@ export default function App() {
     // When criteria change, recalculate scores for all saved listings.
     // The raw yes/no/unclear scores stay the same — only the weights and
     // verdicts are recalculated. Missing scores (new criteria) default to "unclear".
-    const updatedListings = listings.map(l => recalculateForCriteria(l, updatedCriteria));
+    const updatedListings = listings.map(l => recalculateForCriteria(l, newCriteria));
     updatedListings.forEach(l => updateListing(l.id, {
       weighted_score: l.weighted_score,
       verdict: l.verdict,

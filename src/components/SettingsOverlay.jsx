@@ -458,7 +458,13 @@ export default function SettingsOverlay({ criteria, location, onSave, onClose })
 
           {/* Save */}
           <button
-            onClick={() => onSave(localCriteria, localLocation)}
+            onClick={() => {
+              const shortName = localLocation.split(',')[0].trim();
+              const updatedCriteria = localCriteria.map(c =>
+                c.key === 'green_lake' ? { ...c, label: `Near ${shortName}` } : c
+              );
+              onSave(updatedCriteria, localLocation);
+            }}
             className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity"
             style={{ backgroundColor: '#1a1a2e' }}
             onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
