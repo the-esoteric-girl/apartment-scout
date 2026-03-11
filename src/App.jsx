@@ -14,7 +14,7 @@
  * state. Lifting state to the common parent (App) is the React way.
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { getCriteria, getListings, getLocation, saveCriteria, saveListing, saveLocation, updateListing, deleteListing } from './utils/storage';
 import { recalculateForCriteria } from './utils/scoring';
 import BrowseTab from './components/tabs/BrowseTab';
@@ -80,26 +80,6 @@ export default function App() {
   // or "Compare selected" from the Saved tab compare queue (array)
   const [decisionPreload, setDecisionPreload] = useState(null);
   const [decisionPreloadMany, setDecisionPreloadMany] = useState(null);
-
-  // ── Unsaved Browse guard ─────────────────────────────────────────────────
-  // pendingTab: the tab the user tried to switch to while Browse had unsaved content
-  const [pendingTab, setPendingTab] = useState(null);
-
-  const hasUnsavedBrowse =
-    browseState.listingText.trim().length > 0 &&
-    !browseState.justSaved &&
-    !listings.some(l => l.rawText === browseState.listingText);
-
-  // Native browser close/refresh warning
-  useEffect(() => {
-    if (!hasUnsavedBrowse) return;
-    function handler(e) {
-      e.preventDefault();
-      e.returnValue = '';
-    }
-    window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
-  }, [hasUnsavedBrowse]);
 
   // ── Listing actions (passed down to child tabs) ───────────────────────────
   function handleSaveListing(listing) {
@@ -220,13 +200,7 @@ export default function App() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => {
-                    if (tab.id !== activeTab && activeTab === 'browse' && hasUnsavedBrowse) {
-                      setPendingTab(tab.id);
-                    } else {
-                      setActiveTab(tab.id);
-                    }
-                  }}
+                  onClick={() => setActiveTab(tab.id)}
                   className="relative flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
                   style={{
                     color: isActive ? '#1a1a2e' : '#6b7280',
@@ -281,9 +255,6 @@ export default function App() {
             onSave={handleSaveListing}
             browseState={browseState}
             onBrowseStateChange={updateBrowseState}
-            showLeavePrompt={!!pendingTab}
-            onConfirmLeave={() => { setActiveTab(pendingTab); setPendingTab(null); }}
-            onCancelLeave={() => setPendingTab(null)}
           />
         )}
         {activeTab === 'decision' && (

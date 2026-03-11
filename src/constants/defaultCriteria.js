@@ -140,6 +140,16 @@ export const CRITERION_DESCRIPTIONS = {
  */
 export const CRITERIA_LIBRARY = [
   {
+    category: 'Essentials',
+    items: [
+      { key: 'washer_dryer',   label: 'In-unit W/D' },
+      { key: 'price',          label: 'Price ≤ $2,000' },
+      { key: 'parking',        label: 'Parking included' },
+      { key: 'cosigner',       label: 'Co-signer friendly' },
+      { key: 'month_to_month', label: 'Month-to-month lease' },
+    ],
+  },
+  {
     category: 'Appliances',
     items: [
       { key: 'dishwasher',      label: 'Dishwasher' },

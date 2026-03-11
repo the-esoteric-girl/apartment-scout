@@ -179,7 +179,7 @@ function ResultSection({ result, criteria, isSaved, onSave }) {
 // Main component
 // ─────────────────────────────────────────────────────────────
 
-export default function BrowseTab({ criteria, listings, location, onSave, browseState, onBrowseStateChange, showLeavePrompt, onConfirmLeave, onCancelLeave }) {
+export default function BrowseTab({ criteria, listings, location, onSave, browseState, onBrowseStateChange }) {
   const { urlOrLabel, listingText, result, error, isLoading, justSaved } = browseState;
 
   const canAnalyze = listingText.trim().length > 20 && !isLoading && criteria.length > 0;
@@ -233,34 +233,6 @@ export default function BrowseTab({ criteria, listings, location, onSave, browse
 
   return (
     <div className="mx-auto" style={{ maxWidth: '680px' }}>
-
-      {/* ── Leave confirmation banner ── */}
-      {showLeavePrompt && (
-        <div
-          className="rounded-xl border p-4 mb-5 flex items-center justify-between gap-4"
-          style={{ backgroundColor: '#fff8e1', borderColor: '#ffb300' }}
-        >
-          <p className="text-sm font-medium" style={{ color: '#92400e' }}>
-            You have unsaved content — leave without saving?
-          </p>
-          <div className="flex gap-2 shrink-0">
-            <button
-              onClick={onCancelLeave}
-              className="px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors"
-              style={{ borderColor: '#e8e8e8', color: '#6b7280', backgroundColor: '#ffffff' }}
-            >
-              Stay
-            </button>
-            <button
-              onClick={onConfirmLeave}
-              className="px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
-              style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}
-            >
-              Leave
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* ── Input card ── */}
       <div
