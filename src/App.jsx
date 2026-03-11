@@ -92,7 +92,7 @@ export default function App() {
         style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
       >
         <div
-          className="mx-auto flex items-center justify-between px-8"
+          className="mx-auto flex items-center justify-between px-4 sm:px-8"
           style={{ maxWidth: '1100px', height: '56px' }}
         >
           {/* Logo */}

@@ -16,7 +16,7 @@
  * saved listings in App.jsx via recalculateForCriteria().
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_CRITERIA } from '../constants/defaultCriteria';
 import DraggableCriteriaList from './DraggableCriteriaList';
@@ -26,6 +26,17 @@ export default function SettingsOverlay({ criteria, onSave, onClose }) {
   const [editingKey, setEditingKey] = useState(null);
   const [editingLabel, setEditingLabel] = useState('');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const panelRef = useRef(null);
+
+  // Close on Escape; focus the panel on mount so Escape is captured immediately
+  useEffect(() => {
+    panelRef.current?.focus();
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const flagOnlyCriteria = localCriteria.filter(c => c.flagOnly);
 
@@ -108,7 +119,9 @@ export default function SettingsOverlay({ criteria, onSave, onClose }) {
       onClick={handleBackdropClick}
     >
       <div
-        className="relative flex flex-col bg-white rounded-2xl shadow-2xl"
+        ref={panelRef}
+        tabIndex={-1}
+        className="relative flex flex-col bg-white rounded-2xl shadow-2xl outline-none"
         style={{ width: '520px', maxWidth: '95vw', maxHeight: '90vh' }}
       >
 

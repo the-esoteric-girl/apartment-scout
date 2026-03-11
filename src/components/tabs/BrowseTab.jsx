@@ -100,7 +100,7 @@ function ResultSection({ result, criteria, isSaved, onSave }) {
             className="text-4xl font-extrabold"
             style={{ color: '#1a1a2e' }}
           >
-            {result.weighted_score}
+            {Math.round(result.weighted_score)}
           </span>
           <span className="text-sm font-medium" style={{ color: '#9ca3af' }}>/100</span>
         </div>
@@ -187,7 +187,7 @@ export default function BrowseTab({ criteria, listings, onSave }) {
   const [error, setError] = useState(null);
   const [justSaved, setJustSaved] = useState(false);
 
-  const canAnalyze = listingText.trim().length > 20 && !isLoading;
+  const canAnalyze = listingText.trim().length > 20 && !isLoading && criteria.length > 0;
 
   // Already saved from a previous session (same raw text exists in storage)
   const alreadySaved = result
@@ -299,6 +299,13 @@ export default function BrowseTab({ criteria, listings, onSave }) {
         >
           {isLoading ? <><Spinner /> Analyzing…</> : 'Analyze Listing'}
         </button>
+
+        {/* No criteria warning */}
+        {criteria.length === 0 && (
+          <p className="mt-2 text-sm text-center" style={{ color: '#ef5350' }}>
+            No criteria set — open ⚙ Settings to add at least one before analyzing.
+          </p>
+        )}
       </div>
 
       {/* ── Error state ── */}

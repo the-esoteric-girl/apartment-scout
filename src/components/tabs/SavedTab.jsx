@@ -184,10 +184,19 @@ export default function SavedTab({ criteria, listings, onUpdate, onDelete, onUse
       {/* ── Listing cards ── */}
       {displayed.length === 0 ? (
         <div
-          className="rounded-xl border py-16 text-center text-sm"
-          style={{ borderColor: '#e8e8e8', color: '#9ca3af', backgroundColor: '#ffffff' }}
+          className="rounded-xl border py-12 text-center flex flex-col items-center gap-3"
+          style={{ borderColor: '#e8e8e8', backgroundColor: '#ffffff' }}
         >
-          No listings match your filters.
+          <p className="text-sm" style={{ color: '#9ca3af' }}>No listings match your filters.</p>
+          <button
+            onClick={() => { setSearch(''); setStatusFilter('all'); }}
+            className="text-sm font-semibold px-4 py-1.5 rounded-lg border transition-colors"
+            style={{ borderColor: '#e8e8e8', color: '#6b7280' }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+          >
+            Clear filters
+          </button>
         </div>
       ) : (
         <div className="flex flex-col gap-3">

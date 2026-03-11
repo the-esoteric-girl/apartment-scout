@@ -22,7 +22,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { buildSystemPrompt, buildDecisionPrompt, analyzeListing } from '../../utils/claude';
 import ScoreCard from '../ScoreCard';
 import VerdictBadge from '../VerdictBadge';
-import ScorePill from '../ScorePill';
 
 // ─────────────────────────────────────────────────────────────
 // Helpers
@@ -221,7 +220,7 @@ function ResultCard({ result, isWinner, criteria, alreadySaved, isSaved, onSave 
         </p>
         <div className="flex items-baseline gap-1">
           <span className="text-3xl font-extrabold" style={{ color: '#1a1a2e' }}>
-            {result.weighted_score}
+            {Math.round(result.weighted_score)}
           </span>
           <span className="text-xs" style={{ color: '#9ca3af' }}>/100</span>
         </div>
@@ -353,7 +352,13 @@ export default function DecisionTab({ criteria, listings, preloadListing, onPrel
   }
 
   const validCount = slots.filter(isSlotValid).length;
-  const canCompare = validCount >= 2 && !isLoading;
+  const canCompare = validCount >= 2 && !isLoading && criteria.length > 0;
+
+  // Detect duplicate saved listings across slots
+  const savedIds = slots
+    .filter(s => s.mode === 'saved' && s.savedListing)
+    .map(s => s.savedListing.id);
+  const hasDuplicateSlots = new Set(savedIds).size !== savedIds.length;
 
   async function handleCompare() {
     setIsLoading(true);
@@ -467,6 +472,16 @@ export default function DecisionTab({ criteria, listings, preloadListing, onPrel
             Add at least 2 listings to compare
           </p>
         )}
+        {hasDuplicateSlots && (
+          <p className="mt-2 text-sm" style={{ color: '#ffb300' }}>
+            You have the same listing in multiple slots — each slot should be a different listing.
+          </p>
+        )}
+        {criteria.length === 0 && (
+          <p className="mt-2 text-sm" style={{ color: '#ef5350' }}>
+            No criteria set — open ⚙ Settings to add at least one before comparing.
+          </p>
+        )}
       </div>
 
       {/* ── Error ── */}
@@ -510,11 +525,8 @@ export default function DecisionTab({ criteria, listings, preloadListing, onPrel
             </div>
           )}
 
-          {/* Cards grid */}
-          <div
-            className="grid gap-4 mb-6"
-            style={{ gridTemplateColumns: `repeat(${Math.min(results.listings?.length ?? 1, 2)}, 1fr)` }}
-          >
+          {/* Cards grid — responsive: 1 col on mobile, 2 on sm+ */}
+          <div className="grid gap-4 mb-6 grid-cols-1 sm:grid-cols-2">
             {results.listings?.map((result, i) => (
               <ResultCard
                 key={i}

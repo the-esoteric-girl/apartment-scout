@@ -137,17 +137,34 @@ export function buildDecisionPrompt(slots) {
  * @returns {Object} — parsed JSON result from Claude
  * @throws {Error} — with a user-friendly message on failure
  */
+// Truncate listing text that would burn excessive tokens.
+// 20,000 chars ≈ ~5,000 tokens — more than enough for any real listing.
+const MAX_USER_PROMPT_CHARS = 20_000;
+
 export async function analyzeListing({ system, userPrompt }) {
+  const truncatedPrompt =
+    userPrompt.length > MAX_USER_PROMPT_CHARS
+      ? userPrompt.slice(0, MAX_USER_PROMPT_CHARS) + '\n\n[listing text truncated — too long]'
+      : userPrompt;
+
   let response;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30_000);
 
   try {
     response = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ system, userPrompt }),
+      body: JSON.stringify({ system, userPrompt: truncatedPrompt }),
+      signal: controller.signal,
     });
-  } catch {
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error("Request timed out — Claude took too long. Try again.");
+    }
     throw new Error("Couldn't reach the server. Check your connection and try again.");
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   if (!response.ok) {
@@ -172,6 +189,6 @@ export async function analyzeListing({ system, userPrompt }) {
   try {
     return JSON.parse(cleaned);
   } catch {
-    throw new Error("Got an unexpected response. Try again.");
+    throw new Error("Claude returned an unreadable response. This sometimes happens with very short or unusual listing text — try adding more details and analyze again.");
   }
 }
