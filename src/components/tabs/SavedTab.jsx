@@ -23,6 +23,7 @@
 import { useState, useMemo } from 'react';
 import EmptyState from '../EmptyState';
 import ListingCard from '../ListingCard';
+import TableView from '../TableView';
 
 // ─────────────────────────────────────────────────────────────
 // Constants
@@ -128,7 +129,7 @@ function SummaryBar({ listings }) {
   ));
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-5">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
       <span className="text-sm font-bold" style={{ color: '#1a1a2e' }}>
         {listings.length} listing{listings.length !== 1 ? 's' : ''}
       </span>
@@ -324,6 +325,7 @@ const DEFAULT_FILTERS = {
 export default function SavedTab({ criteria, listings, onUpdate, onDelete, onUseInDecision, onCompareMany, onGoToBrowse }) {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [compareQueue, setCompareQueue] = useState(new Set()); // Set of listing IDs
+  const [viewMode, setViewMode] = useState('card'); // 'card' | 'table'
 
   function setFilter(key, valueOrUpdater) {
     setFilters(prev => ({
@@ -429,8 +431,31 @@ export default function SavedTab({ criteria, listings, onUpdate, onDelete, onUse
   const compareCount = compareQueue.size;
 
   return (
-    <div className="mx-auto pb-24" style={{ maxWidth: '780px' }}>
-      <SummaryBar listings={listings} />
+    <div className="mx-auto pb-24" style={{ maxWidth: viewMode === 'table' ? '100%' : '780px' }}>
+      {/* ── Top bar: summary + view toggle ── */}
+      <div className="flex items-center justify-between mb-5">
+        <SummaryBar listings={listings} />
+        <div
+          className="flex rounded-lg border overflow-hidden shrink-0"
+          style={{ borderColor: '#e8e8e8' }}
+        >
+          {[{ mode: 'card', icon: '▤', title: 'Card view' }, { mode: 'table', icon: '⊞', title: 'Table view' }].map(({ mode, icon, title }) => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              title={title}
+              className="px-3 py-1.5 text-sm transition-colors"
+              style={
+                viewMode === mode
+                  ? { backgroundColor: '#1a1a2e', color: '#ffffff' }
+                  : { backgroundColor: '#ffffff', color: '#9ca3af' }
+              }
+            >
+              {icon}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <FilterPanel
         filters={filters}
@@ -456,6 +481,16 @@ export default function SavedTab({ criteria, listings, onUpdate, onDelete, onUse
             Clear filters
           </button>
         </div>
+      ) : viewMode === 'table' ? (
+        <TableView
+          listings={displayed}
+          criteria={criteria}
+          onUpdate={onUpdate}
+          onDelete={onDelete}
+          onUseInDecision={onUseInDecision}
+          onAddToCompare={toggleCompare}
+          compareQueue={compareQueue}
+        />
       ) : (
         <div className="flex flex-col gap-3">
           {displayed.map(listing => (
