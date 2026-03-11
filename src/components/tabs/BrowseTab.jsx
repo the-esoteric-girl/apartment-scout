@@ -282,8 +282,7 @@ export default function BrowseTab({ criteria, listings, location, onSave }) {
             placeholder="Paste the full listing text here — description, amenities, price, location..."
             rows={6}
             className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-y"
-            style={{ minHeight: '120px' }}
-            style={{ borderColor: '#e8e8e8', color: '#1a1a2e' }}
+            style={{ minHeight: '120px', borderColor: '#e8e8e8', color: '#1a1a2e' }}
             onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
             onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
           />
