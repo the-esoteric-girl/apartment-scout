@@ -13,10 +13,13 @@
 
 import { DEFAULT_CRITERIA } from '../constants/defaultCriteria';
 
-const LISTINGS_KEY  = 'apartment_scout_listings';
-const CRITERIA_KEY  = 'apartment_scout_criteria';
-const LOCATION_KEY  = 'apartment_scout_location';
-export const DEFAULT_LOCATION = 'Green Lake, Seattle';
+const LISTINGS_KEY         = 'apartment_scout_listings';
+const CRITERIA_KEY         = 'apartment_scout_criteria';
+const LOCATION_KEY         = 'apartment_scout_location';
+const PRICE_THRESHOLD_KEY  = 'apartment_scout_price_threshold';
+
+export const DEFAULT_LOCATION        = 'Green Lake, Seattle';
+export const DEFAULT_PRICE_THRESHOLD = 2000;
 
 // ─────────────────────────────────────────
 // Listings
@@ -113,4 +116,25 @@ export function getLocation() {
 /** Save the target neighborhood string. */
 export function saveLocation(location) {
   localStorage.setItem(LOCATION_KEY, location);
+}
+
+// ─────────────────────────────────────────
+// Price threshold
+// ─────────────────────────────────────────
+
+/** Read the saved maximum rent. Falls back to DEFAULT_PRICE_THRESHOLD. */
+export function getPriceThreshold() {
+  try {
+    const raw = localStorage.getItem(PRICE_THRESHOLD_KEY);
+    if (!raw) return DEFAULT_PRICE_THRESHOLD;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : DEFAULT_PRICE_THRESHOLD;
+  } catch {
+    return DEFAULT_PRICE_THRESHOLD;
+  }
+}
+
+/** Save the maximum rent threshold (number). */
+export function savePriceThreshold(threshold) {
+  localStorage.setItem(PRICE_THRESHOLD_KEY, String(threshold));
 }

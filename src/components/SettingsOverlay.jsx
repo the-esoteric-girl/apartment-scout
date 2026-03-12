@@ -19,7 +19,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { DEFAULT_CRITERIA, CRITERIA_LIBRARY, SEATTLE_NEIGHBORHOODS } from '../constants/defaultCriteria';
-import { DEFAULT_LOCATION } from '../utils/storage';
+import { DEFAULT_LOCATION, DEFAULT_PRICE_THRESHOLD, getPriceThreshold, savePriceThreshold } from '../utils/storage';
 import DraggableCriteriaList from './DraggableCriteriaList';
 
 // ─────────────────────────────────────────────────────────────
@@ -202,6 +202,7 @@ function LibraryPicker({ activeCriteriaKeys, onAdd }) {
 export default function SettingsOverlay({ criteria, location, onSave, onClose }) {
   const [localCriteria, setLocalCriteria] = useState(criteria);
   const [localLocation, setLocalLocation] = useState(location);
+  const [localMaxRent, setLocalMaxRent] = useState(() => getPriceThreshold());
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
   const panelRef = useRef(null);
@@ -248,11 +249,22 @@ export default function SettingsOverlay({ criteria, location, onSave, onClose })
     setLocalCriteria(prev => prev.filter(c => c.key !== key));
   }
 
+  // ── Max rent change ───────────────────────────────────────────────────────
+  function handleMaxRentChange(raw) {
+    const value = raw === '' ? '' : Number(raw);
+    setLocalMaxRent(value);
+    const threshold = value === '' ? DEFAULT_PRICE_THRESHOLD : value;
+    setLocalCriteria(prev =>
+      prev.map(c => c.key === 'price' ? { ...c, label: `Price ≤ $${threshold.toLocaleString()}` } : c)
+    );
+  }
+
   // ── Add from library ──────────────────────────────────────────────────────
   function handleAddFromLibrary(item) {
+    const threshold = localMaxRent === '' ? DEFAULT_PRICE_THRESHOLD : localMaxRent;
     const newCriterion = {
       key: item.key,
-      label: item.label,
+      label: item.key === 'price' ? `Price ≤ $${threshold.toLocaleString()}` : item.label,
       isDisqualifier: false,
       flagOnly: false,
     };
@@ -267,6 +279,7 @@ export default function SettingsOverlay({ criteria, location, onSave, onClose })
   function handleReset() {
     setLocalCriteria(DEFAULT_CRITERIA);
     setLocalLocation(DEFAULT_LOCATION);
+    setLocalMaxRent(DEFAULT_PRICE_THRESHOLD);
     setShowResetConfirm(false);
     setShowLibrary(false);
   }
@@ -328,6 +341,41 @@ export default function SettingsOverlay({ criteria, location, onSave, onClose })
             />
             <p className="text-xs mt-1.5" style={{ color: '#d1d5db' }}>
               Updates the location criterion and Claude's neighborhood awareness.
+            </p>
+          </div>
+
+          {/* ── Maximum rent ── */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#9ca3af' }}>
+              Maximum rent
+            </label>
+            <div className="relative">
+              <span
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-sm pointer-events-none"
+                style={{ color: '#9ca3af' }}
+              >
+                $
+              </span>
+              <input
+                type="number"
+                min="0"
+                step="50"
+                value={localMaxRent}
+                onChange={e => handleMaxRentChange(e.target.value === '' ? '' : Number(e.target.value))}
+                placeholder="2000"
+                className="w-full rounded-lg border pl-7 pr-3 py-2 text-sm outline-none"
+                style={{ borderColor: '#e8e8e8', color: '#1a1a2e', backgroundColor: '#ffffff' }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = '#2A7F7F')}
+                onMouseLeave={e => {
+                  if (document.activeElement !== e.currentTarget)
+                    e.currentTarget.style.borderColor = '#e8e8e8';
+                }}
+                onFocus={e => (e.currentTarget.style.borderColor = '#2A7F7F')}
+                onBlur={e => (e.currentTarget.style.borderColor = '#e8e8e8')}
+              />
+            </div>
+            <p className="text-xs mt-1.5" style={{ color: '#d1d5db' }}>
+              Updates the "Price" criterion label (e.g. Price ≤ $2,000).
             </p>
           </div>
 
@@ -461,9 +509,13 @@ export default function SettingsOverlay({ criteria, location, onSave, onClose })
           <button
             onClick={() => {
               const shortName = localLocation.split(',')[0].trim();
-              const updatedCriteria = localCriteria.map(c =>
-                c.key === 'green_lake' ? { ...c, label: `Near ${shortName}` } : c
-              );
+              const threshold = localMaxRent === '' ? DEFAULT_PRICE_THRESHOLD : localMaxRent;
+              const updatedCriteria = localCriteria.map(c => {
+                if (c.key === 'green_lake') return { ...c, label: `Near ${shortName}` };
+                if (c.key === 'price') return { ...c, label: `Price ≤ $${threshold.toLocaleString()}` };
+                return c;
+              });
+              savePriceThreshold(threshold);
               onSave(updatedCriteria, localLocation);
             }}
             className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity"
