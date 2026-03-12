@@ -18,6 +18,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { DEFAULT_CRITERIA, CRITERIA_LIBRARY, SEATTLE_NEIGHBORHOODS } from '../../constants/defaultCriteria';
 import { DEFAULT_LOCATION, DEFAULT_PRICE_THRESHOLD, getPriceThreshold, savePriceThreshold } from '../../utils/storage';
 import DraggableCriteriaList from '../DraggableCriteriaList';
@@ -174,64 +175,59 @@ function LocationField({ value, onChange }) {
 // ─────────────────────────────────────────────────────────────
 // Criteria library picker (inline expandable panel)
 // ─────────────────────────────────────────────────────────────
-function LibraryPicker({ activeCriteriaKeys, onAdd }) {
+function LibraryPicker({ activeCriteriaKeys, onAdd, onRemove }) {
   return (
-    <div
-      className="rounded-xl border overflow-hidden"
-      style={{ borderColor: '#e8e8e8', backgroundColor: '#fafafa' }}
-    >
-      <div className="px-4 pt-3 pb-2 border-b" style={{ borderColor: '#f3f4f6' }}>
-        <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#9ca3af' }}>
-          Criteria library — click to add
-        </p>
-      </div>
-      <div className="px-4 py-3 flex flex-col gap-4">
-        {CRITERIA_LIBRARY.map(group => {
-          const available = group.items.filter(item => !activeCriteriaKeys.has(item.key));
-          const added     = group.items.filter(item =>  activeCriteriaKeys.has(item.key));
-          if (available.length === 0 && added.length === 0) return null;
-
-          return (
-            <div key={group.category}>
-              <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#d1d5db' }}>
-                {group.category}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {group.items.map(item => {
-                  const isAdded = activeCriteriaKeys.has(item.key);
-                  return (
-                    <button
-                      key={item.key}
-                      onClick={() => !isAdded && onAdd(item)}
-                      disabled={isAdded}
-                      className="px-3 py-1.5 rounded-full text-xs font-medium border transition-colors"
-                      style={
-                        isAdded
-                          ? { backgroundColor: '#e0f2f1', borderColor: '#2A7F7F', color: '#2A7F7F', cursor: 'default' }
-                          : { backgroundColor: '#ffffff', borderColor: '#e8e8e8', color: '#6b7280', cursor: 'pointer' }
+    <div className="px-4 py-3 flex flex-col gap-4">
+      {CRITERIA_LIBRARY.map(group => {
+        if (group.items.length === 0) return null;
+        return (
+          <div key={group.category}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#d1d5db' }}>
+              {group.category}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {group.items.map(item => {
+                const isAdded = activeCriteriaKeys.has(item.key);
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => isAdded ? onRemove(item.key) : onAdd(item)}
+                    className="px-3 py-1.5 rounded-full text-xs font-medium border transition-colors"
+                    style={
+                      isAdded
+                        ? { backgroundColor: '#e0f2f1', borderColor: '#2A7F7F', color: '#2A7F7F', cursor: 'pointer' }
+                        : { backgroundColor: '#ffffff', borderColor: '#e8e8e8', color: '#6b7280', cursor: 'pointer' }
+                    }
+                    onMouseEnter={e => {
+                      if (isAdded) {
+                        e.currentTarget.style.backgroundColor = '#ffebee';
+                        e.currentTarget.style.borderColor = '#ef5350';
+                        e.currentTarget.style.color = '#ef5350';
+                      } else {
+                        e.currentTarget.style.borderColor = '#2A7F7F';
+                        e.currentTarget.style.color = '#2A7F7F';
                       }
-                      onMouseEnter={e => {
-                        if (!isAdded) {
-                          e.currentTarget.style.borderColor = '#2A7F7F';
-                          e.currentTarget.style.color = '#2A7F7F';
-                        }
-                      }}
-                      onMouseLeave={e => {
-                        if (!isAdded) {
-                          e.currentTarget.style.borderColor = '#e8e8e8';
-                          e.currentTarget.style.color = '#6b7280';
-                        }
-                      }}
-                    >
-                      {isAdded ? `✓ ${item.label}` : `+ ${item.label}`}
-                    </button>
-                  );
-                })}
-              </div>
+                    }}
+                    onMouseLeave={e => {
+                      if (isAdded) {
+                        e.currentTarget.style.backgroundColor = '#e0f2f1';
+                        e.currentTarget.style.borderColor = '#2A7F7F';
+                        e.currentTarget.style.color = '#2A7F7F';
+                      } else {
+                        e.currentTarget.style.borderColor = '#e8e8e8';
+                        e.currentTarget.style.color = '#6b7280';
+                      }
+                    }}
+                    title={isAdded ? 'Click to remove' : 'Click to add'}
+                  >
+                    {isAdded ? `✓ ${item.label}` : `+ ${item.label}`}
+                  </button>
+                );
+              })}
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -422,39 +418,31 @@ export default function SettingsTab({ criteria, location, onSave, onDirtyChange 
             onDelete={handleDelete}
           />
 
-          {/* Add from library toggle */}
-          <button
-            onClick={() => setShowLibrary(v => !v)}
-            className="mt-3 w-full py-2.5 rounded-xl text-sm font-medium border-2 border-dashed transition-colors flex items-center justify-center gap-1.5"
-            style={
-              showLibrary
-                ? { borderColor: '#2A7F7F', color: '#2A7F7F', backgroundColor: '#f0fafa' }
-                : { borderColor: '#e8e8e8', color: '#9ca3af', backgroundColor: 'transparent' }
-            }
-            onMouseEnter={e => {
-              if (!showLibrary) {
-                e.currentTarget.style.borderColor = '#2A7F7F';
-                e.currentTarget.style.color = '#2A7F7F';
-              }
-            }}
-            onMouseLeave={e => {
-              if (!showLibrary) {
-                e.currentTarget.style.borderColor = '#e8e8e8';
-                e.currentTarget.style.color = '#9ca3af';
-              }
-            }}
+          {/* Add from library — collapsible */}
+          <div
+            className="mt-3 rounded-xl border overflow-hidden"
+            style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
           >
-            {showLibrary ? '▲ Hide library' : '+ Browse criteria library'}
-          </button>
-
-          {showLibrary && (
-            <div className="mt-2">
-              <LibraryPicker
-                activeCriteriaKeys={activeScoredKeys}
-                onAdd={handleAddFromLibrary}
-              />
-            </div>
-          )}
+            <button
+              onClick={() => setShowLibrary(v => !v)}
+              className="w-full flex items-center justify-between px-4 py-3"
+            >
+              <span className="text-sm font-semibold" style={{ color: '#1a1a2e' }}>+ Criteria library</span>
+              {showLibrary
+                ? <ChevronUp size={15} style={{ color: '#9ca3af' }} />
+                : <ChevronDown size={15} style={{ color: '#9ca3af' }} />
+              }
+            </button>
+            {showLibrary && (
+              <div className="border-t" style={{ borderColor: '#f3f4f6' }}>
+                <LibraryPicker
+                  activeCriteriaKeys={activeScoredKeys}
+                  onAdd={handleAddFromLibrary}
+                  onRemove={handleDelete}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ── Flag-only criteria — read-only info ── */}
