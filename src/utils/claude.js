@@ -55,11 +55,7 @@ export function buildSystemPrompt(criteria, location = 'Green Lake, Seattle') {
     scoresTemplate[c.key] = 'yes|no|unclear';
   });
   flagCriteria.forEach(c => {
-    if (c.key === 'pet_policy') {
-      scoresTemplate[c.key] = 'safe|risk|unknown';
-    } else {
-      scoresTemplate[c.key] = 'exact quote from listing or null';
-    }
+    scoresTemplate[c.key] = 'exact quote from listing or null';
   });
 
   return `You are an apartment research assistant helping a junior UX designer find housing near ${location}.

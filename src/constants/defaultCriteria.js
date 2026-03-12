@@ -56,12 +56,6 @@ export const DEFAULT_CRITERIA = [
 
   // --- Flag-only criteria (always surfaced, never scored) ---
   {
-    key: 'pet_policy',
-    label: 'Pet policy (cat)',
-    isDisqualifier: false,
-    flagOnly: true,
-  },
-  {
     key: 'ceiling_height',
     label: 'Ceiling height',
     isDisqualifier: false,
@@ -89,7 +83,7 @@ export const CRITERION_DESCRIPTIONS = {
   parking:           'Street or assigned parking available for a car',
   cosigner:          'Likely to accept co-signer. Individual/private landlords = yes. Large property management companies = unclear unless stated.',
   month_to_month:    'Month-to-month or short/flexible lease available',
-  pet_policy:        'Cat-friendly. Values: "safe" | "risk" | "unknown"',
+  cats_allowed:      'Cats are allowed. Check pet policy section.',
   ceiling_height:    'Any mention of ceiling height, loft, top floor, high ceilings, vaulted. Extract the exact phrase or null.',
   neighborhood_note: 'Brief note on neighborhood location relative to the target area. One sentence max.',
 
@@ -189,6 +183,7 @@ export const CRITERIA_LIBRARY = [
   {
     category: 'Pets',
     items: [
+      { key: 'cats_allowed', label: 'Cats allowed' },
       { key: 'dog_friendly', label: 'Dog-friendly' },
     ],
   },

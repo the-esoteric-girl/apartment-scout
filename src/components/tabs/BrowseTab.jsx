@@ -19,15 +19,6 @@ import ScoreCard from '../ScoreCard';
 import VerdictBadge from '../VerdictBadge';
 
 // ─────────────────────────────────────────────────────────────
-// Pet policy callout styles
-// ─────────────────────────────────────────────────────────────
-const PET_STYLES = {
-  safe:    { bg: '#e8f5e9', border: '#43a047', color: '#2e7d32', icon: '🐱', label: 'Cat-friendly' },
-  risk:    { bg: '#ffebee', border: '#ef5350', color: '#c62828', icon: '⚠️', label: 'Pet risk — check policy' },
-  unknown: { bg: '#fff8e1', border: '#ffb300', color: '#e65100', icon: '❓', label: 'Pet policy unknown' },
-};
-
-// ─────────────────────────────────────────────────────────────
 // Sub-components
 // ─────────────────────────────────────────────────────────────
 
@@ -65,8 +56,6 @@ function Spinner() {
 }
 
 function ResultSection({ result, criteria, isSaved, onSave }) {
-  const petPolicy = result.scores?.pet_policy;
-  const petStyle = PET_STYLES[petPolicy] ?? null;
   const ceilingQuote = result.scores?.ceiling_height;
   const neighborhoodNote = result.scores?.neighborhood_note;
 
@@ -130,13 +119,6 @@ function ResultSection({ result, criteria, isSaved, onSave }) {
           <Callout bg="#e8f5e9" border="#43a047" color="#2e7d32">
             <span className="font-semibold">⬆️ Ceiling: </span>
             &ldquo;{ceilingQuote}&rdquo;
-          </Callout>
-        )}
-
-        {/* Pet policy */}
-        {petStyle && (
-          <Callout bg={petStyle.bg} border={petStyle.border} color={petStyle.color}>
-            <span className="font-semibold">{petStyle.icon} {petStyle.label}</span>
           </Callout>
         )}
 
