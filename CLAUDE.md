@@ -214,3 +214,11 @@ Use this format exactly:
 **Why:** [reasoning, tradeoffs, what was considered and rejected]
 
 **Tradeoff:** [what you gave up by choosing this approach, or "None significant"]
+
+## Git workflow
+
+- Never work directly on main
+- Create a new branch for every feature or fix
+- Branch naming: feature/short-name, fix/short-name, polish/short-name
+- Commit after each working unit using: type(scope): short summary
+- Do NOT push to main — I will do that myself when ready

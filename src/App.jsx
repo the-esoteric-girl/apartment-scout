@@ -14,6 +14,7 @@
  */
 
 import { useState } from 'react';
+import { Search, Scale, Home, Settings as SettingsIcon } from 'lucide-react';
 import { getCriteria, getListings, getLocation, saveCriteria, saveListing, saveLocation, updateListing, deleteListing } from './utils/storage';
 import { recalculateForCriteria } from './utils/scoring';
 import BrowseTab from './components/tabs/BrowseTab';
@@ -22,10 +23,10 @@ import SavedTab from './components/tabs/SavedTab';
 import SettingsTab, { UnsavedChangesDialog } from './components/tabs/SettingsTab';
 
 const TABS = [
-  { id: 'browse',    label: 'Browse',    icon: '🔍' },
-  { id: 'decision',  label: 'Decision',  icon: '⚖️' },
-  { id: 'saved',     label: 'Saved',     icon: '🏠' },
-  { id: 'settings',  label: 'Settings',  icon: '⚙️' },
+  { id: 'browse',    label: 'Browse',   Icon: Search },
+  { id: 'decision',  label: 'Decision', Icon: Scale },
+  { id: 'saved',     label: 'Saved',    Icon: Home },
+  { id: 'settings',  label: 'Settings', Icon: SettingsIcon },
 ];
 
 // ── Persistent tab state defaults ────────────────────────────────────────────
@@ -216,7 +217,7 @@ export default function App() {
                   }}
                   title={tab.label}
                 >
-                  <span>{tab.icon}</span>
+                  <tab.Icon size={16} />
                   <span className="hidden sm:inline">{tab.label}</span>
 
                   {/* Count badge on Saved tab */}

@@ -13,6 +13,7 @@
  *   onUseInDecision   — fn(listing) opens Decision tab with this listing pre-loaded
  */
 import { useState, useRef, useEffect } from 'react';
+import { Trash2 } from 'lucide-react';
 import ScoreCard from './ScoreCard';
 import VerdictBadge from './VerdictBadge';
 import { calculateWeightedScore, calculateVerdict } from '../utils/scoring';
@@ -300,11 +301,11 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
           ) : (
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="text-lg leading-none px-1 transition-opacity opacity-40 hover:opacity-100"
+              className="p-1 transition-opacity opacity-40 hover:opacity-100"
               style={{ color: '#ef5350' }}
               title="Delete listing"
             >
-              ×
+              <Trash2 size={15} />
             </button>
           )}
         </div>
