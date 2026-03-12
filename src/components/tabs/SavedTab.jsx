@@ -156,7 +156,7 @@ function SummaryBar({ listings }) {
 // ─────────────────────────────────────────────────────────────
 function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, scoredCriteria }) {
   const {
-    search, sortBy, statusFilter, bedroomsFilter, verdictFilter,
+    statusFilter, bedroomsFilter, verdictFilter,
     scoreFloor, maxRent, neighborhoodSearch, mustBeYes,
   } = filters;
 
@@ -170,31 +170,7 @@ function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, s
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Row 1: Search + Sort */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <input
-          type="text"
-          value={search}
-          onChange={e => setFilter('search', e.target.value)}
-          placeholder="Search by name or address…"
-          className="flex-1 rounded-lg border px-3 py-2 text-sm outline-none"
-          style={{ borderColor: '#e8e8e8', color: '#1a1a2e', backgroundColor: '#ffffff' }}
-          onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
-          onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
-        />
-        <select
-          value={sortBy}
-          onChange={e => setFilter('sortBy', e.target.value)}
-          className="rounded-lg border px-3 py-2 text-sm outline-none"
-          style={{ borderColor: '#e8e8e8', color: '#1a1a2e', backgroundColor: '#ffffff', cursor: 'pointer' }}
-        >
-          {SORT_OPTIONS.map(o => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* Row 2: Status */}
+      {/* Status */}
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#9ca3af' }}>Status</p>
         <PillGroup
@@ -410,6 +386,30 @@ export default function SavedTab({
   return (
     <div className="mx-auto pb-24" style={{ maxWidth: '780px' }}>
       <SummaryBar listings={listings} />
+
+      {/* ── Always-visible search + sort ── */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-3">
+        <input
+          type="text"
+          value={filters.search}
+          onChange={e => onSetFilter('search', e.target.value)}
+          placeholder="Search by name or address…"
+          className="flex-1 rounded-lg border px-3 py-2 text-sm outline-none"
+          style={{ borderColor: '#e8e8e8', color: '#1a1a2e', backgroundColor: '#ffffff' }}
+          onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
+          onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
+        />
+        <select
+          value={filters.sortBy}
+          onChange={e => onSetFilter('sortBy', e.target.value)}
+          className="rounded-lg border px-3 py-2 text-sm outline-none"
+          style={{ borderColor: '#e8e8e8', color: '#1a1a2e', backgroundColor: '#ffffff', cursor: 'pointer' }}
+        >
+          {SORT_OPTIONS.map(o => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+      </div>
 
       {/* ── Collapsible filter panel ── */}
       <div
