@@ -118,17 +118,33 @@ function PillGroup({ options, value, onChange, getLabel }) {
 // ─────────────────────────────────────────────────────────────
 // SummaryBar
 // ─────────────────────────────────────────────────────────────
-function SummaryBar({ listings }) {
+function SummaryBar({ listings, statusFilter, onSetFilter }) {
   const counts = listings.reduce((acc, l) => {
     acc[l.status] = (acc[l.status] ?? 0) + 1;
     return acc;
   }, {});
 
-  const parts = Object.entries(counts).map(([status, n]) => (
-    <span key={status} style={{ color: '#6b7280' }}>
-      {n} {STATUS_LABELS[status] ?? status}
-    </span>
-  ));
+  const parts = Object.entries(counts).map(([status, n]) => {
+    const isActive = statusFilter === status;
+    return (
+      <button
+        key={status}
+        onClick={() => onSetFilter('statusFilter', isActive ? 'all' : status)}
+        className="text-sm transition-colors"
+        style={{
+          color: isActive ? '#2A7F7F' : '#6b7280',
+          fontWeight: isActive ? '600' : '400',
+          textDecoration: isActive ? 'underline' : 'none',
+          cursor: 'pointer',
+        }}
+        onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = '#1a1a2e'; }}
+        onMouseLeave={e => { e.currentTarget.style.color = isActive ? '#2A7F7F' : '#6b7280'; }}
+        title={isActive ? `Clear ${STATUS_LABELS[status] ?? status} filter` : `Filter by ${STATUS_LABELS[status] ?? status}`}
+      >
+        {n} {STATUS_LABELS[status] ?? status}
+      </button>
+    );
+  });
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-5">
@@ -385,7 +401,7 @@ export default function SavedTab({
 
   return (
     <div className="mx-auto pb-24" style={{ maxWidth: '780px' }}>
-      <SummaryBar listings={listings} />
+      <SummaryBar listings={listings} statusFilter={filters.statusFilter} onSetFilter={onSetFilter} />
 
       {/* ── Always-visible search + sort ── */}
       <div className="flex flex-col sm:flex-row gap-3 mb-3">
