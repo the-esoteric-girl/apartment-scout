@@ -407,7 +407,7 @@ export default function SettingsTab({ criteria, location, onSave, onDirtyChange 
             Scoring criteria
           </p>
           <p className="text-xs mb-3" style={{ color: '#d1d5db' }}>
-            Drag to reorder — #1 counts most toward your score. Click a label to rename.
+            Drag to reorder — 1 counts most toward your score. Click a label to rename.
           </p>
 
           <DraggableCriteriaList

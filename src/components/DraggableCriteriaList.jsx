@@ -89,7 +89,7 @@ function SortableRow({
         className="flex-shrink-0 text-xs font-bold w-6 text-center"
         style={{ color: '#9ca3af' }}
       >
-        #{rank}
+        {rank}
       </span>
 
       {/* Label — click to edit */}

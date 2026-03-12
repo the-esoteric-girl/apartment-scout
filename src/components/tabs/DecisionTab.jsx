@@ -236,7 +236,7 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                       >
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-semibold w-5 shrink-0 text-right" style={{ color: '#9ca3af' }}>
-                            #{index + 1}
+                            {index + 1}
                           </span>
                           <span className="text-sm font-medium leading-snug" style={{ color: '#1a1a2e' }}>
                             {criterion.label}

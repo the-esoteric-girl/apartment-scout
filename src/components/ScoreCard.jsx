@@ -34,7 +34,7 @@ export default function ScoreCard({ scores, criteria, onScoreChange }) {
                 className="text-xs font-semibold w-6 text-center shrink-0"
                 style={{ color: '#9ca3af' }}
               >
-                #{rank}
+                {rank}
               </span>
               <span className="text-sm font-medium" style={{ color: '#1a1a2e' }}>
                 {criterion.label}
