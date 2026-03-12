@@ -23,6 +23,50 @@ import { DEFAULT_LOCATION, DEFAULT_PRICE_THRESHOLD, getPriceThreshold, savePrice
 import DraggableCriteriaList from '../DraggableCriteriaList';
 
 // ─────────────────────────────────────────────────────────────
+// Dirty-state confirmation dialog
+// ─────────────────────────────────────────────────────────────
+export function UnsavedChangesDialog({ onStay, onLeave }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ backgroundColor: 'rgba(0,0,0,0.35)' }}
+    >
+      <div
+        className="rounded-2xl border bg-white p-6 shadow-xl"
+        style={{ maxWidth: '360px', width: '90%', borderColor: '#e8e8e8' }}
+      >
+        <h2 className="font-bold text-base mb-1" style={{ color: '#1a1a2e' }}>
+          Unsaved settings changes
+        </h2>
+        <p className="text-sm mb-5" style={{ color: '#6b7280' }}>
+          Leave without saving?
+        </p>
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={onStay}
+            className="px-4 py-2 rounded-xl text-sm font-medium border"
+            style={{ borderColor: '#e8e8e8', color: '#1a1a2e', backgroundColor: '#ffffff' }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; }}
+          >
+            Stay
+          </button>
+          <button
+            onClick={onLeave}
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-white"
+            style={{ backgroundColor: '#1a1a2e' }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+          >
+            Leave
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
 // Location autocomplete
 // ─────────────────────────────────────────────────────────────
 function LocationField({ value, onChange }) {
@@ -195,12 +239,24 @@ function LibraryPicker({ activeCriteriaKeys, onAdd }) {
 // ─────────────────────────────────────────────────────────────
 // Main component
 // ─────────────────────────────────────────────────────────────
-export default function SettingsTab({ criteria, location, onSave }) {
+export default function SettingsTab({ criteria, location, onSave, onDirtyChange }) {
   const [localCriteria, setLocalCriteria] = useState(criteria);
   const [localLocation, setLocalLocation] = useState(location);
   const [localMaxRent, setLocalMaxRent] = useState(() => getPriceThreshold());
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
+
+  // Track the persisted max rent so we can detect dirty state after saves
+  const savedMaxRentRef = useRef(getPriceThreshold());
+
+  // Notify parent whenever dirty state changes
+  useEffect(() => {
+    const dirty =
+      JSON.stringify(localCriteria) !== JSON.stringify(criteria) ||
+      localLocation !== location ||
+      localMaxRent !== savedMaxRentRef.current;
+    onDirtyChange?.(dirty);
+  }, [localCriteria, localLocation, localMaxRent, criteria, location]);
 
   const scoredCriteria   = localCriteria.filter(c => !c.flagOnly);
   const flagOnlyCriteria = localCriteria.filter(c => c.flagOnly);
@@ -277,7 +333,10 @@ export default function SettingsTab({ criteria, location, onSave }) {
       return c;
     });
     savePriceThreshold(threshold);
+    savedMaxRentRef.current = threshold;
     onSave(updatedCriteria, localLocation);
+    // isDirty will become false on next render because criteria/location props
+    // will update to match local state (App re-renders with new saved values).
   }
 
   return (

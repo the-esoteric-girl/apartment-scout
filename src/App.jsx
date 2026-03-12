@@ -19,7 +19,7 @@ import { recalculateForCriteria } from './utils/scoring';
 import BrowseTab from './components/tabs/BrowseTab';
 import DecisionTab, { createSlot } from './components/tabs/DecisionTab';
 import SavedTab from './components/tabs/SavedTab';
-import SettingsTab from './components/tabs/SettingsTab';
+import SettingsTab, { UnsavedChangesDialog } from './components/tabs/SettingsTab';
 
 const TABS = [
   { id: 'browse',    label: 'Browse',    icon: '🔍' },
@@ -55,6 +55,8 @@ const INITIAL_SAVED_FILTERS = {
 export default function App() {
   // ── State ────────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState('browse');
+  const [settingsDirty, setSettingsDirty] = useState(false);
+  const [pendingTab, setPendingTab] = useState(null);
 
   // () => getCriteria() means "run this once on mount to get the initial value"
   // This pattern (lazy initial state) avoids reading localStorage on every render
@@ -160,6 +162,25 @@ export default function App() {
     setListings(getListings());
   }
 
+  // ── Tab navigation with dirty-state guard ────────────────────────────────
+  function handleTabClick(tabId) {
+    if (activeTab === 'settings' && settingsDirty && tabId !== 'settings') {
+      setPendingTab(tabId);
+    } else {
+      setActiveTab(tabId);
+    }
+  }
+
+  function confirmLeaveSettings() {
+    setSettingsDirty(false);
+    setActiveTab(pendingTab);
+    setPendingTab(null);
+  }
+
+  function cancelLeaveSettings() {
+    setPendingTab(null);
+  }
+
   // ── Tab header ────────────────────────────────────────────────────────────
   const savedCount = listings.length;
 
@@ -187,7 +208,7 @@ export default function App() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabClick(tab.id)}
                   className="relative flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
                   style={{
                     color: isActive ? '#1a1a2e' : '#6b7280',
@@ -272,9 +293,17 @@ export default function App() {
             criteria={criteria}
             location={location}
             onSave={handleSaveSettings}
+            onDirtyChange={setSettingsDirty}
           />
         )}
       </main>
+
+      {pendingTab && (
+        <UnsavedChangesDialog
+          onStay={cancelLeaveSettings}
+          onLeave={confirmLeaveSettings}
+        />
+      )}
     </div>
   );
 }

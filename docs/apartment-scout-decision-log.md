@@ -84,3 +84,13 @@ Browser → /api/analyze (Vercel function) → Anthropic API
 | 6     | Polish — responsive pass, error states, edge cases, visual QA                                             |
 
 ---
+
+### D7 — Dirty-State Guard: Lift Flag to App, Intercept Tab Clicks
+
+**Decision:** `isDirty` is computed in `SettingsTab` via `useEffect` (comparing local state to saved props) and surfaced to `App` via an `onDirtyChange` callback; tab-click interception happens in `App`.
+
+**Why:** The dirty flag needs to live where tab navigation lives (App), but the comparison logic belongs in SettingsTab where the local state is. Lifting the flag via a callback keeps each layer responsible for what it owns. An alternative was lifting all Settings local state into App, but that would bloat App and break the existing clean separation where Settings manages its own draft state.
+
+**Tradeoff:** Two render cycles on each change (SettingsTab updates local state → effect fires → App re-renders with new dirty flag), but this is imperceptible and avoids coupling App to Settings internals.
+
+---
