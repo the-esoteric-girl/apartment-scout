@@ -19,6 +19,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { DEFAULT_CRITERIA, CRITERIA_LIBRARY, SEATTLE_NEIGHBORHOODS } from '../constants/defaultCriteria';
+import { DEFAULT_LOCATION } from '../utils/storage';
 import DraggableCriteriaList from './DraggableCriteriaList';
 
 // ─────────────────────────────────────────────────────────────
@@ -265,7 +266,7 @@ export default function SettingsOverlay({ criteria, location, onSave, onClose })
   // ── Reset ────────────────────────────────────────────────────────────────
   function handleReset() {
     setLocalCriteria(DEFAULT_CRITERIA);
-    setLocalLocation('Green Lake, Seattle');
+    setLocalLocation(DEFAULT_LOCATION);
     setShowResetConfirm(false);
     setShowLibrary(false);
   }

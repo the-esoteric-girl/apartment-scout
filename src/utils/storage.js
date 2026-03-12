@@ -16,7 +16,7 @@ import { DEFAULT_CRITERIA } from '../constants/defaultCriteria';
 const LISTINGS_KEY  = 'apartment_scout_listings';
 const CRITERIA_KEY  = 'apartment_scout_criteria';
 const LOCATION_KEY  = 'apartment_scout_location';
-const DEFAULT_LOCATION = 'Green Lake, Seattle';
+export const DEFAULT_LOCATION = 'Green Lake, Seattle';
 
 // ─────────────────────────────────────────
 // Listings
