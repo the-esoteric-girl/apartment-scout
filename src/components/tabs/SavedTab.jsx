@@ -20,7 +20,8 @@
  *   onCompare         — fn(listing[]) → switches to Decision tab with multiple listings preloaded
  *   onGoToBrowse      — fn() → switches to Browse tab (used in empty state)
  */
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import { SlidersHorizontal, ChevronDown, ChevronUp } from 'lucide-react';
 import EmptyState from '../EmptyState';
 import ListingCard from '../ListingCard';
 
@@ -166,10 +167,7 @@ function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, s
   }
 
   return (
-    <div
-      className="rounded-xl border p-4 mb-5 flex flex-col gap-4"
-      style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
-    >
+    <div className="flex flex-col gap-4">
       {/* Row 1: Search + Sort */}
       <div className="flex flex-col sm:flex-row gap-3">
         <input
@@ -315,6 +313,8 @@ export default function SavedTab({
   filters, onSetFilter, onResetFilters,
   compareQueue, onToggleCompare, onClearCompareQueue,
 }) {
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
   function toggleCompare(listing) {
     onToggleCompare(listing.id);
   }
@@ -407,13 +407,45 @@ export default function SavedTab({
     <div className="mx-auto pb-24" style={{ maxWidth: '780px' }}>
       <SummaryBar listings={listings} />
 
-      <FilterPanel
-        filters={filters}
-        setFilter={onSetFilter}
-        resetAllFilters={onResetFilters}
-        activeFilterCount={activeFilterCount}
-        scoredCriteria={scoredCriteria}
-      />
+      {/* ── Collapsible filter panel ── */}
+      <div
+        className="rounded-xl border mb-5 overflow-hidden"
+        style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
+      >
+        <button
+          onClick={() => setFiltersOpen(v => !v)}
+          className="w-full flex items-center justify-between px-4 py-3"
+        >
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal size={14} style={{ color: '#9ca3af' }} />
+            <span className="text-sm font-semibold" style={{ color: '#1a1a2e' }}>Filters</span>
+            {activeFilterCount > 0 && (
+              <span
+                className="rounded-full px-2 py-0 text-xs font-bold text-white"
+                style={{ backgroundColor: '#2A7F7F', fontSize: '11px' }}
+              >
+                {activeFilterCount}
+              </span>
+            )}
+          </div>
+          {filtersOpen
+            ? <ChevronUp size={15} style={{ color: '#9ca3af' }} />
+            : <ChevronDown size={15} style={{ color: '#9ca3af' }} />
+          }
+        </button>
+
+        {filtersOpen && (
+          <div className="border-t px-4 pb-4 pt-3 flex flex-col gap-4" style={{ borderColor: '#f3f4f6' }}>
+            <FilterPanel
+              filters={filters}
+              setFilter={onSetFilter}
+              resetAllFilters={onResetFilters}
+              activeFilterCount={activeFilterCount}
+              scoredCriteria={scoredCriteria}
+            />
+          </div>
+        )}
+      </div>
 
       {displayed.length === 0 ? (
         <div
