@@ -5,7 +5,6 @@
  *   - activeTab: which tab is showing
  *   - criteria: the user's scoring criteria (read from localStorage on load)
  *   - listings: all saved listings (read from localStorage on load)
- *   - showSettings: whether the settings overlay is open
  *   - decisionPreload: a listing to pre-load into Decision tab (from "Use in Decision Mode")
  *
  * Why keep listings + criteria here instead of reading localStorage in each tab?
@@ -20,12 +19,13 @@ import { recalculateForCriteria } from './utils/scoring';
 import BrowseTab from './components/tabs/BrowseTab';
 import DecisionTab, { createSlot } from './components/tabs/DecisionTab';
 import SavedTab from './components/tabs/SavedTab';
-import SettingsOverlay from './components/SettingsOverlay';
+import SettingsTab from './components/tabs/SettingsTab';
 
 const TABS = [
-  { id: 'browse',   label: 'Browse',   icon: '🔍' },
-  { id: 'decision', label: 'Decision', icon: '⚖️' },
-  { id: 'saved',    label: 'Saved',    icon: '🏠' },
+  { id: 'browse',    label: 'Browse',    icon: '🔍' },
+  { id: 'decision',  label: 'Decision',  icon: '⚖️' },
+  { id: 'saved',     label: 'Saved',     icon: '🏠' },
+  { id: 'settings',  label: 'Settings',  icon: '⚙️' },
 ];
 
 // ── Persistent tab state defaults ────────────────────────────────────────────
@@ -55,7 +55,6 @@ const INITIAL_SAVED_FILTERS = {
 export default function App() {
   // ── State ────────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState('browse');
-  const [showSettings, setShowSettings] = useState(false);
 
   // () => getCriteria() means "run this once on mount to get the initial value"
   // This pattern (lazy initial state) avoids reading localStorage on every render
@@ -142,7 +141,7 @@ export default function App() {
   }
 
   // ── Criteria + location actions ───────────────────────────────────────────
-  // Called by SettingsOverlay with already-correct criteria (label updates applied before calling).
+  // Called by SettingsTab with already-correct criteria (label updates applied before calling).
   function handleSaveSettings(newCriteria, newLocation) {
     saveCriteria(newCriteria);
     setCriteria(newCriteria);
@@ -159,8 +158,6 @@ export default function App() {
       verdict: l.verdict,
     }));
     setListings(getListings());
-
-    setShowSettings(false);
   }
 
   // ── Tab header ────────────────────────────────────────────────────────────
@@ -223,15 +220,8 @@ export default function App() {
             })}
           </nav>
 
-          {/* Settings gear icon — right side */}
-          <button
-            onClick={() => setShowSettings(true)}
-            className="flex items-center justify-center w-9 h-9 rounded-lg transition-colors text-lg"
-            style={{ color: '#6b7280' }}
-            title="Scoring criteria settings"
-          >
-            ⚙
-          </button>
+          {/* Spacer to balance logo on left */}
+          <div style={{ width: '36px' }} />
         </div>
       </header>
 
@@ -277,17 +267,14 @@ export default function App() {
             onClearCompareQueue={clearSavedCompareQueue}
           />
         )}
+        {activeTab === 'settings' && (
+          <SettingsTab
+            criteria={criteria}
+            location={location}
+            onSave={handleSaveSettings}
+          />
+        )}
       </main>
-
-      {/* ── Settings overlay ───────────────────────────────────────────── */}
-      {showSettings && (
-        <SettingsOverlay
-          criteria={criteria}
-          location={location}
-          onSave={handleSaveSettings}
-          onClose={() => setShowSettings(false)}
-        />
-      )}
     </div>
   );
 }
