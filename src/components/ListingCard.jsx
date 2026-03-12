@@ -269,15 +269,31 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
           })}
         </div>
 
-        {/* Bottom row: expand toggle + delete */}
+        {/* Bottom row: expand toggle + compare + delete */}
         <div className="flex items-center justify-between">
-          <button
-            onClick={() => setIsExpanded(v => !v)}
-            className="text-sm font-medium"
-            style={{ color: '#2A7F7F' }}
-          >
-            {isExpanded ? 'Hide details ↑' : 'View details ↓'}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsExpanded(v => !v)}
+              className="text-sm font-medium"
+              style={{ color: '#2A7F7F' }}
+            >
+              {isExpanded ? 'Hide details ↑' : 'View details ↓'}
+            </button>
+
+            {onAddToCompare && (
+              <button
+                onClick={() => onAddToCompare(listing)}
+                className="text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors"
+                style={
+                  inCompareQueue
+                    ? { color: '#ffffff', borderColor: '#1a1a2e', backgroundColor: '#1a1a2e' }
+                    : { color: '#6b7280', borderColor: '#e8e8e8', backgroundColor: '#ffffff' }
+                }
+              >
+                {inCompareQueue ? '✓ Added' : '+ Compare'}
+              </button>
+            )}
+          </div>
 
           {/* Delete with confirmation */}
           {showDeleteConfirm ? (
@@ -367,31 +383,15 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
             />
           </div>
 
-          {/* Footer: Use in Decision Mode + Compare + timestamp */}
+          {/* Footer: Use in Decision Mode + timestamp */}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => onUseInDecision(listing)}
-                className="text-sm font-semibold px-4 py-2 rounded-lg border transition-colors"
-                style={{ color: '#2A7F7F', borderColor: '#2A7F7F', backgroundColor: '#ffffff' }}
-              >
-                ⚖️ Use in Decision Mode
-              </button>
-
-              {onAddToCompare && (
-                <button
-                  onClick={() => onAddToCompare(listing)}
-                  className="text-sm font-semibold px-4 py-2 rounded-lg border transition-colors"
-                  style={
-                    inCompareQueue
-                      ? { color: '#ffffff', borderColor: '#1a1a2e', backgroundColor: '#1a1a2e' }
-                      : { color: '#6b7280', borderColor: '#e8e8e8', backgroundColor: '#ffffff' }
-                  }
-                >
-                  {inCompareQueue ? '✓ In compare' : '+ Compare'}
-                </button>
-              )}
-            </div>
+            <button
+              onClick={() => onUseInDecision(listing)}
+              className="text-sm font-semibold px-4 py-2 rounded-lg border transition-colors"
+              style={{ color: '#2A7F7F', borderColor: '#2A7F7F', backgroundColor: '#ffffff' }}
+            >
+              ⚖️ Use in Decision Mode
+            </button>
 
             <span className="text-xs" style={{ color: '#9ca3af' }}>
               Saved {formatDate(listing.savedAt)}
