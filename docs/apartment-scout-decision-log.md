@@ -94,3 +94,13 @@ Browser → /api/analyze (Vercel function) → Anthropic API
 **Tradeoff:** Two render cycles on each change (SettingsTab updates local state → effect fires → App re-renders with new dirty flag), but this is imperceptible and avoids coupling App to Settings internals.
 
 ---
+
+### D8 — Criteria Library: Collapsible Panel + Toggle-Remove Pills
+
+**Decision:** Replaced the dashed-border "Add criteria" toggle button with a collapsible panel (matching the Saved tab filter pattern), and made already-added criteria pills clickable to remove (red hover affordance) instead of rendering them disabled.
+
+**Why:** The original pattern had two problems: (1) the dashed button was visually inconsistent with the collapsible filter panel introduced in the Saved tab, and (2) disabled pills gave no affordance for removing a criterion — users had to scroll up to the draggable list and find the ✕ button. The new pattern surfaces removal in the same place as addition, where the user's attention already is.
+
+**Tradeoff:** The red-on-hover removal affordance is only discoverable by hovering. A persistent remove icon on each added pill would be more explicit but clutters the pill at small text sizes.
+
+---
