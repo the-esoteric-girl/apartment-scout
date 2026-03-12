@@ -473,7 +473,7 @@ function SlotInput({ slot, index, totalSlots, savedListings, onChange, onRemove 
             <option value="">Select a saved listing…</option>
             {savedListings.map(l => (
               <option key={l.id} value={l.id}>
-                {l.name}{l.price ? ` — ${l.price}` : ''}
+                {l.name}
               </option>
             ))}
           </select>
