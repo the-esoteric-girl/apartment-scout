@@ -248,6 +248,28 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
           </div>
         </div>
 
+        {/* Collapsed callouts: neighborhood note (always) + pet risk warning */}
+        {(neighborhoodNote || petPolicy === 'risk') && (
+          <div className="flex flex-col gap-1.5 mb-3">
+            {neighborhoodNote && (
+              <div
+                className="rounded-lg px-3 py-2 text-xs border-l-4"
+                style={{ backgroundColor: '#e0f2f1', borderLeftColor: '#2A7F7F', color: '#00695c' }}
+              >
+                <span className="font-semibold">📍 </span>{neighborhoodNote}
+              </div>
+            )}
+            {petPolicy === 'risk' && (
+              <div
+                className="rounded-lg px-3 py-2 text-xs border-l-4"
+                style={{ backgroundColor: '#ffebee', borderLeftColor: '#ef5350', color: '#c62828' }}
+              >
+                <span className="font-semibold">⚠️ Pet risk</span> — check policy before applying
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Status pill group */}
         <div className="flex flex-wrap gap-1.5 mb-3">
           {STATUSES.map(s => {
