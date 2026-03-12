@@ -281,9 +281,11 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
                 className="px-3 py-1 rounded-full text-xs font-semibold transition-colors"
                 style={
                   isActive
-                    ? STATUS_ACTIVE_STYLE[s.value]
-                    : { backgroundColor: '#f9fafb', color: '#9ca3af' }
+                    ? { ...STATUS_ACTIVE_STYLE[s.value], cursor: 'default' }
+                    : { backgroundColor: '#f9fafb', color: '#9ca3af', cursor: 'pointer' }
                 }
+                onMouseEnter={e => { if (!isActive) e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
+                onMouseLeave={e => { if (!isActive) e.currentTarget.style.backgroundColor = '#f9fafb'; }}
               >
                 {s.label}
               </button>

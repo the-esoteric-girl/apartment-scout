@@ -18,7 +18,7 @@ export default function VerdictBadge({ verdict, size = 'md' }) {
   return (
     <span
       className={`inline-block rounded-full font-semibold ${padding}`}
-      style={{ backgroundColor: s.backgroundColor, color: s.color }}
+      style={{ backgroundColor: s.backgroundColor, color: s.color, cursor: 'default' }}
     >
       {s.label}
     </span>

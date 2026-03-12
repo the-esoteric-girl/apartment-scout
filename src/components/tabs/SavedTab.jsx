@@ -101,9 +101,11 @@ function PillGroup({ options, value, onChange, getLabel }) {
             className="px-3 py-1 rounded-full text-xs font-semibold transition-colors"
             style={
               isActive
-                ? { backgroundColor: '#1a1a2e', color: '#ffffff' }
-                : { backgroundColor: '#f3f4f6', color: '#6b7280' }
+                ? { backgroundColor: '#1a1a2e', color: '#ffffff', cursor: 'default' }
+                : { backgroundColor: '#f3f4f6', color: '#6b7280', cursor: 'pointer' }
             }
+            onMouseEnter={e => { if (!isActive) e.currentTarget.style.backgroundColor = '#e5e7eb'; }}
+            onMouseLeave={e => { if (!isActive) e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
           >
             {label}
           </button>
@@ -276,9 +278,11 @@ function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, s
                   className="px-3 py-1 rounded-full text-xs font-semibold border transition-colors"
                   style={
                     isActive
-                      ? { backgroundColor: '#2A7F7F', color: '#ffffff', borderColor: '#2A7F7F' }
-                      : { backgroundColor: '#f3f4f6', color: '#6b7280', borderColor: 'transparent' }
+                      ? { backgroundColor: '#2A7F7F', color: '#ffffff', borderColor: '#2A7F7F', cursor: 'pointer' }
+                      : { backgroundColor: '#f3f4f6', color: '#6b7280', borderColor: 'transparent', cursor: 'pointer' }
                   }
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.backgroundColor = '#e5e7eb'; }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
                 >
                   {isActive ? '✓ ' : ''}{c.label}
                 </button>

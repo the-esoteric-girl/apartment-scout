@@ -18,7 +18,7 @@ export default function ScorePill({ score }) {
   return (
     <span
       className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold"
-      style={{ backgroundColor: s.backgroundColor, color: s.color }}
+      style={{ backgroundColor: s.backgroundColor, color: s.color, cursor: 'default' }}
     >
       {s.label}
     </span>
