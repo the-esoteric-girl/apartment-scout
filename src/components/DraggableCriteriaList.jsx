@@ -61,9 +61,8 @@ function SortableRow({
         opacity: isDragging ? 0.4 : 1,
         zIndex: isDragging ? 10 : 'auto',
         position: 'relative',
-        borderColor: isDragging ? '#2A7F7F' : '#e8e8e8',
       }}
-      className="flex items-center gap-2.5 px-3 py-2.5 bg-white rounded-xl border"
+      className={`flex items-center gap-2.5 px-3 py-2.5 bg-white rounded-xl border ${isDragging ? 'border-accent' : 'border-border'}`}
     >
       {/* Drag handle */}
       <button
@@ -85,10 +84,7 @@ function SortableRow({
       </button>
 
       {/* Rank number */}
-      <span
-        className="flex-shrink-0 text-xs font-bold w-6 text-center"
-        style={{ color: '#9ca3af' }}
-      >
+      <span className="flex-shrink-0 text-xs font-bold w-6 text-center text-tertiary">
         {rank}
       </span>
 
@@ -104,13 +100,13 @@ function SortableRow({
           onBlur={onCommitEdit}
           onFocus={e => e.target.select()}
           autoFocus
-          className="flex-1 text-sm font-medium rounded-lg px-2 py-0.5 outline-none border"
-          style={{ borderColor: '#2A7F7F', color: '#1a1a2e', minWidth: 0 }}
+          className="flex-1 text-sm font-medium rounded-lg px-2 py-0.5 outline-none border border-accent text-primary"
+          style={{ minWidth: 0 }}
         />
       ) : (
         <span
-          className="flex-1 text-sm font-medium truncate cursor-text"
-          style={{ color: '#1a1a2e', minWidth: 0 }}
+          className="flex-1 text-sm font-medium truncate cursor-text text-primary"
+          style={{ minWidth: 0 }}
           onClick={() => onStartEdit(criterion)}
           title="Click to rename"
         >
@@ -121,12 +117,11 @@ function SortableRow({
       {/* Must-have toggle */}
       <button
         onClick={() => onToggleDisqualifier(criterion.key)}
-        className="flex-shrink-0 text-xs px-2 py-1 rounded-full font-medium transition-colors"
-        style={
+        className={`flex-shrink-0 text-xs px-2 py-1 rounded-full font-medium transition-colors ${
           criterion.isDisqualifier
-            ? { backgroundColor: '#ffebee', color: '#ef5350' }
-            : { backgroundColor: '#f3f4f6', color: '#9ca3af' }
-        }
+            ? 'bg-score-no-bg text-score-no'
+            : 'bg-inactive text-tertiary'
+        }`}
         title={
           criterion.isDisqualifier
             ? 'Must-have: a "No" here forces Skip verdict'

@@ -60,21 +60,15 @@ function ResultSection({ result, criteria, isSaved, onSave }) {
   const neighborhoodNote = result.scores?.neighborhood_note;
 
   return (
-    <div
-      className="rounded-xl border overflow-hidden"
-      style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
-    >
+    <div className="rounded-xl border overflow-hidden bg-white border-border">
       {/* ── Header ── */}
-      <div className="px-6 pt-6 pb-4 border-b" style={{ borderColor: '#f3f4f6' }}>
+      <div className="px-6 pt-6 pb-4 border-b border-inactive">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <h2
-              className="text-xl font-bold leading-tight mb-1"
-              style={{ color: '#1a1a2e' }}
-            >
+            <h2 className="text-xl font-bold leading-tight mb-1 text-primary">
               {result.name || 'Listing'}
             </h2>
-            <p className="text-sm" style={{ color: '#6b7280' }}>
+            <p className="text-sm text-secondary">
               {[result.address, result.price].filter(Boolean).join(' · ')}
             </p>
           </div>
@@ -85,13 +79,10 @@ function ResultSection({ result, criteria, isSaved, onSave }) {
 
         {/* Score number */}
         <div className="mt-3 flex items-baseline gap-1">
-          <span
-            className="text-4xl font-extrabold"
-            style={{ color: '#1a1a2e' }}
-          >
+          <span className="text-4xl font-extrabold text-primary">
             {Math.round(result.weighted_score)}
           </span>
-          <span className="text-sm font-medium" style={{ color: '#9ca3af' }}>/100</span>
+          <span className="text-sm font-medium text-tertiary">/100</span>
         </div>
       </div>
 
@@ -108,7 +99,7 @@ function ResultSection({ result, criteria, isSaved, onSave }) {
 
         {/* Criteria scorecard */}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#9ca3af' }}>
+          <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-tertiary">
             Scorecard
           </p>
           <ScoreCard scores={result.scores} criteria={criteria} />
@@ -132,7 +123,7 @@ function ResultSection({ result, criteria, isSaved, onSave }) {
 
         {/* Verdict reason */}
         {result.verdict_reason && (
-          <p className="text-sm leading-relaxed" style={{ color: '#6b7280' }}>
+          <p className="text-sm leading-relaxed text-secondary">
             {result.verdict_reason}
           </p>
         )}
@@ -143,12 +134,11 @@ function ResultSection({ result, criteria, isSaved, onSave }) {
         <button
           onClick={onSave}
           disabled={isSaved}
-          className="w-full py-2.5 rounded-lg text-sm font-semibold border transition-all"
-          style={
+          className={`w-full py-2.5 rounded-lg text-sm font-semibold border transition-all ${
             isSaved
-              ? { backgroundColor: '#f3f4f6', color: '#9ca3af', borderColor: '#e8e8e8', cursor: 'default' }
-              : { backgroundColor: '#ffffff', color: '#2A7F7F', borderColor: '#2A7F7F', cursor: 'pointer' }
-          }
+              ? 'bg-inactive text-tertiary border-border cursor-default'
+              : 'bg-white text-accent border-accent cursor-pointer'
+          }`}
         >
           {isSaved ? 'Saved ✓' : 'Save this listing'}
         </button>
@@ -217,26 +207,19 @@ export default function BrowseTab({ criteria, listings, location, onSave, browse
     <div className="mx-auto" style={{ maxWidth: '680px' }}>
 
       {/* ── Input card ── */}
-      <div
-        className="rounded-xl border p-6 mb-6"
-        style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
-      >
+      <div className="rounded-xl border p-6 mb-6 bg-white border-border">
         {/* URL / label */}
         <div className="mb-4">
-          <label
-            className="block text-sm font-medium mb-1.5"
-            style={{ color: '#1a1a2e' }}
-          >
+          <label className="block text-sm font-medium mb-1.5 text-primary">
             URL or nickname{' '}
-            <span className="font-normal" style={{ color: '#9ca3af' }}>(optional)</span>
+            <span className="font-normal text-tertiary">(optional)</span>
           </label>
           <input
             type="text"
             value={urlOrLabel}
             onChange={e => onBrowseStateChange({ urlOrLabel: e.target.value })}
             placeholder="Zillow URL or nickname"
-            className="w-full rounded-lg border px-3 py-2 text-sm outline-none"
-            style={{ borderColor: '#e8e8e8', color: '#1a1a2e' }}
+            className="w-full rounded-lg border px-3 py-2 text-sm outline-none border-border text-primary"
             onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
             onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
           />
@@ -244,10 +227,7 @@ export default function BrowseTab({ criteria, listings, location, onSave, browse
 
         {/* Listing text */}
         <div className="mb-5">
-          <label
-            className="block text-sm font-medium mb-1.5"
-            style={{ color: '#1a1a2e' }}
-          >
+          <label className="block text-sm font-medium mb-1.5 text-primary">
             Listing text
           </label>
           <textarea
@@ -255,8 +235,8 @@ export default function BrowseTab({ criteria, listings, location, onSave, browse
             onChange={e => onBrowseStateChange({ listingText: e.target.value })}
             placeholder="Paste the full listing text here — description, amenities, price, location..."
             rows={6}
-            className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-y"
-            style={{ minHeight: '120px', borderColor: '#e8e8e8', color: '#1a1a2e' }}
+            className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-y border-border text-primary"
+            style={{ minHeight: '120px' }}
             onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
             onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
           />
@@ -267,12 +247,11 @@ export default function BrowseTab({ criteria, listings, location, onSave, browse
           <button
             onClick={handleAnalyze}
             disabled={!canAnalyze}
-            className="flex-1 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
-            style={{
-              backgroundColor: canAnalyze ? '#1a1a2e' : '#e8e8e8',
-              color: canAnalyze ? '#ffffff' : '#9ca3af',
-              cursor: canAnalyze ? 'pointer' : 'default',
-            }}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${
+              canAnalyze
+                ? 'bg-primary text-white cursor-pointer'
+                : 'bg-border text-tertiary cursor-default'
+            }`}
           >
             {isLoading ? <><Spinner /> Analyzing…</> : 'Analyze Listing'}
           </button>
@@ -280,8 +259,7 @@ export default function BrowseTab({ criteria, listings, location, onSave, browse
           {result && (
             <button
               onClick={() => onBrowseStateChange({ urlOrLabel: '', listingText: '', result: null, error: null, justSaved: false })}
-              className="px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
-              style={{ borderColor: '#e8e8e8', color: '#6b7280', backgroundColor: '#ffffff' }}
+              className="px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors border-border text-secondary bg-white"
               title="Clear and start over"
             >
               Clear
@@ -291,7 +269,7 @@ export default function BrowseTab({ criteria, listings, location, onSave, browse
 
         {/* No criteria warning */}
         {criteria.length === 0 && (
-          <p className="mt-2 text-sm text-center" style={{ color: '#ef5350' }}>
+          <p className="mt-2 text-sm text-center text-score-no">
             No criteria set — open ⚙ Settings to add at least one before analyzing.
           </p>
         )}
@@ -299,10 +277,7 @@ export default function BrowseTab({ criteria, listings, location, onSave, browse
 
       {/* ── Error state ── */}
       {error && (
-        <div
-          className="rounded-xl px-4 py-3 mb-6 flex items-start gap-3 border-l-4"
-          style={{ backgroundColor: '#ffebee', borderLeftColor: '#ef5350' }}
-        >
+        <div className="rounded-xl px-4 py-3 mb-6 flex items-start gap-3 border-l-4 bg-score-no-bg border-l-score-no">
           <span className="text-lg leading-none mt-0.5" aria-hidden="true">⚠</span>
           <div>
             <p className="text-sm font-medium" style={{ color: '#c62828' }}>

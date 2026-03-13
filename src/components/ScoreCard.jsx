@@ -19,7 +19,7 @@ export default function ScoreCard({ scores, criteria, onScoreChange }) {
   const scored = criteria.filter(c => !c.flagOnly);
 
   return (
-    <div className="divide-y" style={{ borderColor: '#f3f4f6' }}>
+    <div className="divide-y divide-inactive">
       {scored.map((criterion, index) => {
         const score = scores?.[criterion.key] ?? 'unclear';
         const rank = index + 1;
@@ -30,20 +30,14 @@ export default function ScoreCard({ scores, criteria, onScoreChange }) {
             className="flex items-center justify-between py-2.5"
           >
             <div className="flex items-center gap-2.5">
-              <span
-                className="text-xs font-semibold w-6 text-center shrink-0"
-                style={{ color: '#9ca3af' }}
-              >
+              <span className="text-xs font-semibold w-6 text-center shrink-0 text-tertiary">
                 {rank}
               </span>
-              <span className="text-sm font-medium" style={{ color: '#1a1a2e' }}>
+              <span className="text-sm font-medium text-primary">
                 {criterion.label}
               </span>
               {criterion.isDisqualifier && (
-                <span
-                  className="text-xs px-1.5 py-0.5 rounded font-medium"
-                  style={{ backgroundColor: '#ffebee', color: '#ef5350' }}
-                >
+                <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-score-no-bg text-score-no">
                   must-have
                 </span>
               )}
@@ -65,7 +59,7 @@ export default function ScoreCard({ scores, criteria, onScoreChange }) {
       })}
 
       {onScoreChange && (
-        <p className="pt-2 text-xs" style={{ color: '#9ca3af' }}>
+        <p className="pt-2 text-xs text-tertiary">
           Tap a score to override · cycles yes → unclear → no
         </p>
       )}

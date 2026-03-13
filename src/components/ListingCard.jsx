@@ -145,10 +145,7 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
   const neighborhoodNote = listing.scores?.neighborhood_note;
 
   return (
-    <div
-      className="rounded-xl border overflow-hidden"
-      style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
-    >
+    <div className="rounded-xl border overflow-hidden bg-white border-border">
       {/* ── Collapsed row ── */}
       <div className="px-5 py-4">
 
@@ -163,14 +160,13 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
                 onChange={e => setEditName(e.target.value)}
                 onBlur={commitNameEdit}
                 onKeyDown={handleNameKeyDown}
-                className="text-base font-bold rounded px-1 -mx-1 outline-none border-b-2 w-full"
-                style={{ color: '#1a1a2e', borderBottomColor: '#2A7F7F', backgroundColor: 'transparent' }}
+                className="text-base font-bold rounded px-1 -mx-1 outline-none border-b-2 w-full text-primary"
+                style={{ borderBottomColor: '#2A7F7F', backgroundColor: 'transparent' }}
               />
             ) : (
               <button
                 onClick={() => { setIsEditingName(true); setEditName(listing.name); }}
-                className="text-base font-bold text-left hover:underline decoration-dashed truncate block w-full"
-                style={{ color: '#1a1a2e' }}
+                className="text-base font-bold text-left hover:underline decoration-dashed truncate block w-full text-primary"
                 title="Click to rename"
               >
                 {listing.name}
@@ -178,7 +174,7 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
             )}
 
             {/* Address + price — editable only when blank */}
-            <div className="flex flex-wrap items-center gap-x-1.5 mt-0.5 text-sm" style={{ color: '#6b7280' }}>
+            <div className="flex flex-wrap items-center gap-x-1.5 mt-0.5 text-sm text-secondary">
               {/* Address */}
               {listing.address && /\d/.test(listing.address) ? (
                 <span className="truncate max-w-[200px]">{listing.address}</span>
@@ -190,8 +186,8 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
                   onBlur={commitAddressEdit}
                   onKeyDown={handleAddressKeyDown}
                   placeholder="Address"
-                  className="rounded px-1 -mx-1 outline-none border-b"
-                  style={{ color: '#6b7280', borderBottomColor: '#2A7F7F', backgroundColor: 'transparent', minWidth: '120px' }}
+                  className="rounded px-1 -mx-1 outline-none border-b text-secondary"
+                  style={{ borderBottomColor: '#2A7F7F', backgroundColor: 'transparent', minWidth: '120px' }}
                 />
               ) : (
                 <button
@@ -220,8 +216,8 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
                   onBlur={commitPriceEdit}
                   onKeyDown={handlePriceKeyDown}
                   placeholder="Price"
-                  className="rounded px-1 -mx-1 outline-none border-b"
-                  style={{ color: '#6b7280', borderBottomColor: '#2A7F7F', backgroundColor: 'transparent', minWidth: '80px' }}
+                  className="rounded px-1 -mx-1 outline-none border-b text-secondary"
+                  style={{ borderBottomColor: '#2A7F7F', backgroundColor: 'transparent', minWidth: '80px' }}
                 />
               ) : (
                 <button
@@ -239,10 +235,10 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
           {/* Score + verdict */}
           <div className="flex items-center gap-3 shrink-0">
             <div className="text-right">
-              <span className="text-2xl font-extrabold" style={{ color: '#1a1a2e' }}>
+              <span className="text-2xl font-extrabold text-primary">
                 {listing.weighted_score}
               </span>
-              <span className="text-xs ml-0.5" style={{ color: '#9ca3af' }}>/100</span>
+              <span className="text-xs ml-0.5 text-tertiary">/100</span>
             </div>
             <VerdictBadge verdict={listing.verdict} size="sm" />
           </div>
@@ -252,18 +248,12 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
         {(neighborhoodNote || petPolicy === 'risk') && (
           <div className="flex flex-col gap-1.5 mb-3">
             {neighborhoodNote && (
-              <div
-                className="rounded-lg px-3 py-2 text-xs border-l-4"
-                style={{ backgroundColor: '#e0f2f1', borderLeftColor: '#2A7F7F', color: '#00695c' }}
-              >
+              <div className="rounded-lg px-3 py-2 text-xs border-l-4 bg-callout-bg border-l-accent text-callout-text">
                 <span className="font-semibold">📍 </span>{neighborhoodNote}
               </div>
             )}
             {petPolicy === 'risk' && (
-              <div
-                className="rounded-lg px-3 py-2 text-xs border-l-4"
-                style={{ backgroundColor: '#ffebee', borderLeftColor: '#ef5350', color: '#c62828' }}
-              >
+              <div className="rounded-lg px-3 py-2 text-xs border-l-4 bg-score-no-bg border-l-score-no" style={{ color: '#c62828' }}>
                 <span className="font-semibold">⚠️ Pet risk</span> — check policy before applying
               </div>
             )}
@@ -298,8 +288,7 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsExpanded(v => !v)}
-              className="text-sm font-medium"
-              style={{ color: '#2A7F7F' }}
+              className="text-sm font-medium text-accent"
             >
               {isExpanded ? 'Hide details ↑' : 'View details ↓'}
             </button>
@@ -322,18 +311,16 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
           {/* Delete with confirmation */}
           {showDeleteConfirm ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs" style={{ color: '#6b7280' }}>Delete this listing?</span>
+              <span className="text-xs text-secondary">Delete this listing?</span>
               <button
                 onClick={() => onDelete(listing.id)}
-                className="text-xs font-semibold px-2.5 py-1 rounded"
-                style={{ backgroundColor: '#ffebee', color: '#ef5350' }}
+                className="text-xs font-semibold px-2.5 py-1 rounded bg-score-no-bg text-score-no"
               >
                 Delete
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="text-xs font-medium px-2.5 py-1 rounded"
-                style={{ backgroundColor: '#f3f4f6', color: '#6b7280' }}
+                className="text-xs font-medium px-2.5 py-1 rounded bg-inactive text-secondary"
               >
                 Cancel
               </button>
@@ -341,8 +328,7 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
           ) : (
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="p-1 transition-opacity opacity-40 hover:opacity-100"
-              style={{ color: '#ef5350' }}
+              className="p-1 transition-opacity opacity-40 hover:opacity-100 text-score-no"
               title="Delete listing"
             >
               <Trash2 size={15} />
@@ -353,12 +339,9 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
 
       {/* ── Expanded detail view ── */}
       {isExpanded && (
-        <div
-          className="px-5 pb-5 border-t flex flex-col gap-4"
-          style={{ borderColor: '#f3f4f6' }}
-        >
+        <div className="px-5 pb-5 border-t border-inactive flex flex-col gap-4">
           <div className="pt-4">
-            <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#9ca3af' }}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-tertiary">
               Scorecard
             </p>
             <ScoreCard scores={listing.scores} criteria={criteria} onScoreChange={handleScoreChange} />
@@ -389,10 +372,7 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
 
           {/* Notes */}
           <div>
-            <label
-              className="block text-xs font-semibold uppercase tracking-wide mb-1.5"
-              style={{ color: '#9ca3af' }}
-            >
+            <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5 text-tertiary">
               Personal notes
             </label>
             <textarea
@@ -401,8 +381,7 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
               onBlur={handleNotesBlur}
               placeholder="Add your own notes about this listing…"
               rows={3}
-              className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-none"
-              style={{ borderColor: '#e8e8e8', color: '#1a1a2e' }}
+              className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-none border-border text-primary"
               onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
             />
           </div>
@@ -411,13 +390,12 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
           <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
             <button
               onClick={() => onUseInDecision(listing)}
-              className="text-sm font-semibold px-4 py-2 rounded-lg border transition-colors"
-              style={{ color: '#2A7F7F', borderColor: '#2A7F7F', backgroundColor: '#ffffff' }}
+              className="text-sm font-semibold px-4 py-2 rounded-lg border transition-colors text-accent border-accent bg-white"
             >
               ⚖️ Use in Decision Mode
             </button>
 
-            <span className="text-xs" style={{ color: '#9ca3af' }}>
+            <span className="text-xs text-tertiary">
               Saved {formatDate(listing.savedAt)}
             </span>
           </div>

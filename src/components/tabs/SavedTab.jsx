@@ -148,12 +148,12 @@ function SummaryBar({ listings, statusFilter, onSetFilter }) {
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-5">
-      <span className="text-sm font-bold" style={{ color: '#1a1a2e' }}>
+      <span className="text-sm font-bold text-primary">
         {listings.length} listing{listings.length !== 1 ? 's' : ''}
       </span>
       {parts.length > 0 && (
         <>
-          <span style={{ color: '#e8e8e8' }}>·</span>
+          <span className="text-border">·</span>
           <span className="flex flex-wrap gap-x-3 text-sm">
             {parts.reduce((acc, el, i) => [
               ...acc,
@@ -188,7 +188,7 @@ function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, s
     <div className="flex flex-col gap-4">
       {/* Status */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#9ca3af' }}>Status</p>
+        <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-tertiary">Status</p>
         <PillGroup
           options={STATUS_FILTERS}
           value={statusFilter}
@@ -200,7 +200,7 @@ function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, s
       {/* Row 3: Bedrooms + Verdict */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#9ca3af' }}>Bedrooms</p>
+          <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-tertiary">Bedrooms</p>
           <PillGroup
             options={BEDROOM_OPTIONS}
             value={bedroomsFilter}
@@ -208,7 +208,7 @@ function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, s
           />
         </div>
         <div className="flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#9ca3af' }}>Verdict</p>
+          <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-tertiary">Verdict</p>
           <PillGroup
             options={VERDICT_OPTIONS}
             value={verdictFilter}
@@ -220,7 +220,7 @@ function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, s
       {/* Row 4: Score floor + Max rent + Neighborhood */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#9ca3af' }}>Score</p>
+          <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-tertiary">Score</p>
           <PillGroup
             options={SCORE_FLOOR_OPTIONS}
             value={scoreFloor}
@@ -228,28 +228,26 @@ function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, s
           />
         </div>
         <div className="flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#9ca3af' }}>Max rent</p>
+          <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-tertiary">Max rent</p>
           <input
             type="number"
             value={maxRent}
             onChange={e => setFilter('maxRent', e.target.value)}
             placeholder="e.g. 2000"
             min={0}
-            className="w-full rounded-lg border px-3 py-1.5 text-sm outline-none"
-            style={{ borderColor: '#e8e8e8', color: '#1a1a2e', backgroundColor: '#ffffff' }}
+            className="w-full rounded-lg border px-3 py-1.5 text-sm outline-none border-border text-primary bg-white"
             onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
             onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
           />
         </div>
         <div className="flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#9ca3af' }}>Neighborhood</p>
+          <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-tertiary">Neighborhood</p>
           <input
             type="text"
             value={neighborhoodSearch}
             onChange={e => setFilter('neighborhoodSearch', e.target.value)}
             placeholder="e.g. Capitol Hill"
-            className="w-full rounded-lg border px-3 py-1.5 text-sm outline-none"
-            style={{ borderColor: '#e8e8e8', color: '#1a1a2e', backgroundColor: '#ffffff' }}
+            className="w-full rounded-lg border px-3 py-1.5 text-sm outline-none border-border text-primary bg-white"
             onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
             onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
           />
@@ -259,7 +257,7 @@ function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, s
       {/* Row 5: Must be yes — dynamic scored criteria chips */}
       {scoredCriteria.length > 0 && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#9ca3af' }}>Must be yes</p>
+          <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-tertiary">Must be yes</p>
           <div className="flex flex-wrap gap-1.5">
             {scoredCriteria.map(c => {
               const isActive = mustBeYes.has(c.key);
@@ -286,11 +284,10 @@ function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, s
 
       {/* Clear all */}
       {activeFilterCount > 0 && (
-        <div className="pt-1 border-t" style={{ borderColor: '#f3f4f6' }}>
+        <div className="pt-1 border-t border-inactive">
           <button
             onClick={resetAllFilters}
-            className="text-xs font-semibold"
-            style={{ color: '#2A7F7F' }}
+            className="text-xs font-semibold text-accent"
           >
             Clear all filters ({activeFilterCount} active)
           </button>
@@ -410,16 +407,14 @@ export default function SavedTab({
           value={filters.search}
           onChange={e => onSetFilter('search', e.target.value)}
           placeholder="Search by name or address…"
-          className="flex-1 rounded-lg border px-3 py-2 text-sm outline-none"
-          style={{ borderColor: '#e8e8e8', color: '#1a1a2e', backgroundColor: '#ffffff' }}
+          className="flex-1 rounded-lg border px-3 py-2 text-sm outline-none border-border text-primary bg-white"
           onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
           onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
         />
         <select
           value={filters.sortBy}
           onChange={e => onSetFilter('sortBy', e.target.value)}
-          className="rounded-lg border px-3 py-2 text-sm outline-none"
-          style={{ borderColor: '#e8e8e8', color: '#1a1a2e', backgroundColor: '#ffffff', cursor: 'pointer' }}
+          className="rounded-lg border px-3 py-2 text-sm outline-none border-border text-primary bg-white cursor-pointer"
         >
           {SORT_OPTIONS.map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -428,34 +423,31 @@ export default function SavedTab({
       </div>
 
       {/* ── Collapsible filter panel ── */}
-      <div
-        className="rounded-xl border mb-5 overflow-hidden"
-        style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
-      >
+      <div className="rounded-xl border mb-5 overflow-hidden bg-white border-border">
         <button
           onClick={() => setFiltersOpen(v => !v)}
           className="w-full flex items-center justify-between px-4 py-3"
         >
           <div className="flex items-center gap-2">
-            <SlidersHorizontal size={14} style={{ color: '#9ca3af' }} />
-            <span className="text-sm font-semibold" style={{ color: '#1a1a2e' }}>Filters</span>
+            <SlidersHorizontal size={14} className="text-tertiary" />
+            <span className="text-sm font-semibold text-primary">Filters</span>
             {activeFilterCount > 0 && (
               <span
-                className="rounded-full px-2 py-0 text-xs font-bold text-white"
-                style={{ backgroundColor: '#2A7F7F', fontSize: '11px' }}
+                className="rounded-full px-2 py-0 text-xs font-bold text-white bg-accent"
+                style={{ fontSize: '11px' }}
               >
                 {activeFilterCount}
               </span>
             )}
           </div>
           {filtersOpen
-            ? <ChevronUp size={15} style={{ color: '#9ca3af' }} />
-            : <ChevronDown size={15} style={{ color: '#9ca3af' }} />
+            ? <ChevronUp size={15} className="text-tertiary" />
+            : <ChevronDown size={15} className="text-tertiary" />
           }
         </button>
 
         {filtersOpen && (
-          <div className="border-t px-4 pb-4 pt-3 flex flex-col gap-4" style={{ borderColor: '#f3f4f6' }}>
+          <div className="border-t px-4 pb-4 pt-3 flex flex-col gap-4 border-inactive">
             <FilterPanel
               filters={filters}
               setFilter={onSetFilter}
@@ -468,15 +460,11 @@ export default function SavedTab({
       </div>
 
       {displayed.length === 0 ? (
-        <div
-          className="rounded-xl border py-12 text-center flex flex-col items-center gap-3"
-          style={{ borderColor: '#e8e8e8', backgroundColor: '#ffffff' }}
-        >
-          <p className="text-sm" style={{ color: '#9ca3af' }}>No listings match your filters.</p>
+        <div className="rounded-xl border py-12 text-center flex flex-col items-center gap-3 border-border bg-white">
+          <p className="text-sm text-tertiary">No listings match your filters.</p>
           <button
             onClick={onResetFilters}
-            className="text-sm font-semibold px-4 py-1.5 rounded-lg border transition-colors"
-            style={{ borderColor: '#e8e8e8', color: '#6b7280' }}
+            className="text-sm font-semibold px-4 py-1.5 rounded-lg border transition-colors border-border text-secondary"
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
             onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
           >
@@ -502,10 +490,7 @@ export default function SavedTab({
 
       {/* ── Sticky compare bar ── */}
       {compareCount > 0 && (
-        <div
-          className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between gap-4 px-5 py-4 border-t shadow-lg"
-          style={{ backgroundColor: '#1a1a2e', borderColor: '#2A7F7F' }}
-        >
+        <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between gap-4 px-5 py-4 border-t shadow-lg bg-primary border-accent">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <span className="text-sm font-semibold text-white shrink-0">
               {compareCount} selected
@@ -516,8 +501,7 @@ export default function SavedTab({
                 .map(l => (
                   <span
                     key={l.id}
-                    className="text-xs px-2 py-0.5 rounded-full flex items-center gap-1"
-                    style={{ backgroundColor: '#2A7F7F', color: '#ffffff' }}
+                    className="text-xs px-2 py-0.5 rounded-full flex items-center gap-1 bg-accent text-white"
                   >
                     {l.name}
                     <button
@@ -534,8 +518,7 @@ export default function SavedTab({
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={onClearCompareQueue}
-              className="text-xs font-medium px-3 py-1.5 rounded-lg"
-              style={{ color: '#9ca3af' }}
+              className="text-xs font-medium px-3 py-1.5 rounded-lg text-tertiary"
             >
               Cancel
             </button>
@@ -554,8 +537,7 @@ export default function SavedTab({
           </div>
 
           {compareCount > 4 && (
-            <p className="absolute bottom-full left-0 right-0 text-center text-xs py-1"
-              style={{ backgroundColor: '#ef5350', color: '#ffffff' }}>
+            <p className="absolute bottom-full left-0 right-0 text-center text-xs py-1 bg-score-no text-white">
               Max 4 listings
             </p>
           )}

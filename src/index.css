@@ -4,6 +4,9 @@
 /* Tailwind v4 — single import replaces the old 3-line @tailwind setup */
 @import "tailwindcss";
 
+/* Wire up JS config for custom design tokens (Tailwind v4 requires explicit opt-in) */
+@config "../tailwind.config.js";
+
 /* Reset Vite's default styles and set our design tokens globally */
 @layer base {
   *, *::before, *::after {

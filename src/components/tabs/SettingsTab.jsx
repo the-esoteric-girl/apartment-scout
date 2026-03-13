@@ -33,20 +33,19 @@ export function UnsavedChangesDialog({ onStay, onLeave }) {
       style={{ backgroundColor: 'rgba(0,0,0,0.35)' }}
     >
       <div
-        className="rounded-2xl border bg-white p-6 shadow-xl"
-        style={{ maxWidth: '360px', width: '90%', borderColor: '#e8e8e8' }}
+        className="rounded-2xl border bg-white p-6 shadow-xl border-border"
+        style={{ maxWidth: '360px', width: '90%' }}
       >
-        <h2 className="font-bold text-base mb-1" style={{ color: '#1a1a2e' }}>
+        <h2 className="font-bold text-base mb-1 text-primary">
           Unsaved settings changes
         </h2>
-        <p className="text-sm mb-5" style={{ color: '#6b7280' }}>
+        <p className="text-sm mb-5 text-secondary">
           Leave without saving?
         </p>
         <div className="flex justify-end gap-2">
           <button
             onClick={onStay}
-            className="px-4 py-2 rounded-xl text-sm font-medium border"
-            style={{ borderColor: '#e8e8e8', color: '#1a1a2e', backgroundColor: '#ffffff' }}
+            className="px-4 py-2 rounded-xl text-sm font-medium border border-border text-primary bg-white"
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
             onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; }}
           >
@@ -54,8 +53,7 @@ export function UnsavedChangesDialog({ onStay, onLeave }) {
           </button>
           <button
             onClick={onLeave}
-            className="px-4 py-2 rounded-xl text-sm font-semibold text-white"
-            style={{ backgroundColor: '#1a1a2e' }}
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-primary"
             onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
             onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
           >
@@ -138,8 +136,7 @@ function LocationField({ value, onChange }) {
         onBlur={handleBlur}
         onFocus={() => { if (suggestions.length > 0) setOpen(true); }}
         placeholder="e.g. Capitol Hill, Seattle"
-        className="w-full rounded-lg border px-3 py-2 text-sm outline-none"
-        style={{ borderColor: '#e8e8e8', color: '#1a1a2e', backgroundColor: '#ffffff' }}
+        className="w-full rounded-lg border px-3 py-2 text-sm outline-none border-border text-primary bg-white"
         onMouseEnter={e => (e.currentTarget.style.borderColor = '#2A7F7F')}
         onMouseLeave={e => {
           if (document.activeElement !== e.currentTarget)
@@ -151,15 +148,13 @@ function LocationField({ value, onChange }) {
       {open && (
         <ul
           ref={listRef}
-          className="absolute z-10 w-full rounded-lg border shadow-lg overflow-hidden mt-1"
-          style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
+          className="absolute z-10 w-full rounded-lg border shadow-lg overflow-hidden mt-1 bg-white border-border"
         >
           {suggestions.map(s => (
             <li
               key={s}
               onMouseDown={() => select(s)}
-              className="px-3 py-2 text-sm cursor-pointer transition-colors"
-              style={{ color: '#1a1a2e' }}
+              className="px-3 py-2 text-sm cursor-pointer transition-colors text-primary"
               onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
               onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
@@ -331,8 +326,6 @@ export default function SettingsTab({ criteria, location, onSave, onDirtyChange 
     savePriceThreshold(threshold);
     savedMaxRentRef.current = threshold;
     onSave(updatedCriteria, localLocation);
-    // isDirty will become false on next render because criteria/location props
-    // will update to match local state (App re-renders with new saved values).
   }
 
   return (
@@ -340,21 +333,18 @@ export default function SettingsTab({ criteria, location, onSave, onDirtyChange 
 
       {/* ── Page header ──────────────────────────────────────────────── */}
       <div className="mb-6">
-        <h1 className="font-bold text-xl" style={{ color: '#1a1a2e' }}>Settings</h1>
-        <p className="text-sm mt-1" style={{ color: '#9ca3af' }}>
+        <h1 className="font-bold text-xl text-primary">Settings</h1>
+        <p className="text-sm mt-1 text-tertiary">
           Set your target location and scoring criteria.
         </p>
       </div>
 
       {/* ── Content card ─────────────────────────────────────────────── */}
-      <div
-        className="rounded-2xl border bg-white flex flex-col gap-5 p-6"
-        style={{ borderColor: '#e8e8e8' }}
-      >
+      <div className="rounded-2xl border bg-white flex flex-col gap-5 p-6 border-border">
 
         {/* ── Location ── */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#9ca3af' }}>
+          <label className="block text-xs font-semibold uppercase tracking-wider mb-2 text-tertiary">
             Target neighborhood
           </label>
           <LocationField
@@ -368,14 +358,11 @@ export default function SettingsTab({ criteria, location, onSave, onDirtyChange 
 
         {/* ── Maximum rent ── */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#9ca3af' }}>
+          <label className="block text-xs font-semibold uppercase tracking-wider mb-2 text-tertiary">
             Maximum rent
           </label>
           <div className="relative">
-            <span
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-sm pointer-events-none"
-              style={{ color: '#9ca3af' }}
-            >
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm pointer-events-none text-tertiary">
               $
             </span>
             <input
@@ -385,8 +372,7 @@ export default function SettingsTab({ criteria, location, onSave, onDirtyChange 
               value={localMaxRent}
               onChange={e => handleMaxRentChange(e.target.value === '' ? '' : Number(e.target.value))}
               placeholder="2000"
-              className="w-full rounded-lg border pl-7 pr-3 py-2 text-sm outline-none"
-              style={{ borderColor: '#e8e8e8', color: '#1a1a2e', backgroundColor: '#ffffff' }}
+              className="w-full rounded-lg border pl-7 pr-3 py-2 text-sm outline-none border-border text-primary bg-white"
               onMouseEnter={e => (e.currentTarget.style.borderColor = '#2A7F7F')}
               onMouseLeave={e => {
                 if (document.activeElement !== e.currentTarget)
@@ -403,7 +389,7 @@ export default function SettingsTab({ criteria, location, onSave, onDirtyChange 
 
         {/* ── Scored criteria ── */}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#9ca3af' }}>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-2 text-tertiary">
             Scoring criteria
           </p>
           <p className="text-xs mb-3" style={{ color: '#d1d5db' }}>
@@ -419,22 +405,19 @@ export default function SettingsTab({ criteria, location, onSave, onDirtyChange 
           />
 
           {/* Add from library — collapsible */}
-          <div
-            className="mt-3 rounded-xl border overflow-hidden"
-            style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
-          >
+          <div className="mt-3 rounded-xl border overflow-hidden bg-white border-border">
             <button
               onClick={() => setShowLibrary(v => !v)}
               className="w-full flex items-center justify-between px-4 py-3"
             >
-              <span className="text-sm font-semibold" style={{ color: '#1a1a2e' }}>+ Criteria library</span>
+              <span className="text-sm font-semibold text-primary">+ Criteria library</span>
               {showLibrary
-                ? <ChevronUp size={15} style={{ color: '#9ca3af' }} />
-                : <ChevronDown size={15} style={{ color: '#9ca3af' }} />
+                ? <ChevronUp size={15} className="text-tertiary" />
+                : <ChevronDown size={15} className="text-tertiary" />
               }
             </button>
             {showLibrary && (
-              <div className="border-t" style={{ borderColor: '#f3f4f6' }}>
+              <div className="border-t border-inactive">
                 <LibraryPicker
                   activeCriteriaKeys={activeScoredKeys}
                   onAdd={handleAddFromLibrary}
@@ -448,21 +431,18 @@ export default function SettingsTab({ criteria, location, onSave, onDirtyChange 
         {/* ── Flag-only criteria — read-only info ── */}
         {flagOnlyCriteria.length > 0 && (
           <div>
-            <p
-              className="text-xs font-semibold uppercase tracking-wider mb-2"
-              style={{ color: '#9ca3af' }}
-            >
+            <p className="text-xs font-semibold uppercase tracking-wider mb-2 text-tertiary">
               Auto-detected info fields
             </p>
             <div className="flex flex-col gap-2">
               {flagOnlyCriteria.map(c => (
                 <div
                   key={c.key}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl border"
-                  style={{ borderColor: '#e8e8e8', backgroundColor: '#fafafa' }}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-border"
+                  style={{ backgroundColor: '#fafafa' }}
                 >
                   <span style={{ color: '#d1d5db', fontSize: '13px' }}>ℹ</span>
-                  <span className="flex-1 text-sm" style={{ color: '#6b7280' }}>
+                  <span className="flex-1 text-sm text-secondary">
                     {c.label}
                   </span>
                   <span className="text-xs italic" style={{ color: '#d1d5db' }}>
@@ -478,26 +458,21 @@ export default function SettingsTab({ criteria, location, onSave, onDirtyChange 
         )}
 
         {/* ── Footer: reset + save ── */}
-        <div
-          className="flex items-center justify-between pt-4 border-t"
-          style={{ borderColor: '#e8e8e8' }}
-        >
+        <div className="flex items-center justify-between pt-4 border-t border-border">
           {showResetConfirm ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs" style={{ color: '#6b7280' }}>
+              <span className="text-xs text-secondary">
                 Reset all to defaults?
               </span>
               <button
                 onClick={handleReset}
-                className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white"
-                style={{ backgroundColor: '#ef5350' }}
+                className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white bg-score-no"
               >
                 Yes, reset
               </button>
               <button
                 onClick={() => setShowResetConfirm(false)}
-                className="text-xs px-3 py-1.5 rounded-lg font-medium"
-                style={{ color: '#6b7280' }}
+                className="text-xs px-3 py-1.5 rounded-lg font-medium text-secondary"
                 onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
                 onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
               >
@@ -507,8 +482,7 @@ export default function SettingsTab({ criteria, location, onSave, onDirtyChange 
           ) : (
             <button
               onClick={() => setShowResetConfirm(true)}
-              className="text-xs"
-              style={{ color: '#9ca3af' }}
+              className="text-xs text-tertiary"
               onMouseEnter={e => { e.currentTarget.style.color = '#6b7280'; }}
               onMouseLeave={e => { e.currentTarget.style.color = '#9ca3af'; }}
             >
@@ -518,8 +492,7 @@ export default function SettingsTab({ criteria, location, onSave, onDirtyChange 
 
           <button
             onClick={handleSave}
-            className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity"
-            style={{ backgroundColor: '#1a1a2e' }}
+            className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity bg-primary"
             onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
             onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
           >

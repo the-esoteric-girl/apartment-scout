@@ -189,16 +189,13 @@ export default function App() {
     <div className="min-h-screen" style={{ backgroundColor: '#f7f7f5' }}>
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <header
-        className="sticky top-0 z-40 border-b"
-        style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
-      >
+      <header className="sticky top-0 z-40 border-b bg-white border-border">
         <div
           className="mx-auto flex items-center justify-between px-4 sm:px-8"
           style={{ maxWidth: '1100px', height: '56px' }}
         >
           {/* Logo */}
-          <span className="font-extrabold text-lg tracking-tight" style={{ color: '#1a1a2e' }}>
+          <span className="font-extrabold text-lg tracking-tight text-primary">
             Apartment Scout
           </span>
 
@@ -210,11 +207,9 @@ export default function App() {
                 <button
                   key={tab.id}
                   onClick={() => handleTabClick(tab.id)}
-                  className="relative flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
-                  style={{
-                    color: isActive ? '#1a1a2e' : '#6b7280',
-                    backgroundColor: isActive ? '#f3f4f6' : 'transparent',
-                  }}
+                  className={`relative flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    isActive ? 'text-primary bg-inactive' : 'text-secondary bg-transparent'
+                  }`}
                   title={tab.label}
                 >
                   <tab.Icon size={16} />
@@ -223,8 +218,8 @@ export default function App() {
                   {/* Count badge on Saved tab */}
                   {tab.id === 'saved' && savedCount > 0 && (
                     <span
-                      className="ml-0.5 rounded-full px-1.5 py-0 text-xs font-bold text-white"
-                      style={{ backgroundColor: '#2A7F7F', fontSize: '11px' }}
+                      className="ml-0.5 rounded-full px-1.5 py-0 text-xs font-bold text-white bg-accent"
+                      style={{ fontSize: '11px' }}
                     >
                       {savedCount}
                     </span>
@@ -232,10 +227,7 @@ export default function App() {
 
                   {/* Active underline indicator */}
                   {isActive && (
-                    <span
-                      className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full"
-                      style={{ backgroundColor: '#2A7F7F' }}
-                    />
+                    <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-accent" />
                   )}
                 </button>
               );

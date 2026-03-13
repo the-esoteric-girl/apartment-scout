@@ -62,7 +62,7 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
           className="px-4 py-3 text-xs font-semibold uppercase tracking-wide"
           style={dtStickyLabel('#fafafa')}
         >
-          <span style={{ color: '#9ca3af' }}>{label}</span>
+          <span className="text-tertiary">{label}</span>
         </td>
         {listings.map((l, i) => renderCell(l, i))}
       </tr>
@@ -74,10 +74,9 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
       <tr>
         <td
           colSpan={colCount}
-          className="px-4 py-1 text-xs font-semibold uppercase tracking-wide"
+          className="px-4 py-1 text-xs font-semibold uppercase tracking-wide text-tertiary"
           style={{
             backgroundColor: '#f3f4f6',
-            color: '#9ca3af',
             borderTop: '1px solid #e8e8e8',
             borderBottom: '1px solid #e8e8e8',
           }}
@@ -126,20 +125,17 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
             ...DT_CELL_BORDER,
           }}
         >
-          <span className="text-2xl font-extrabold" style={{ color: '#1a1a2e' }}>
+          <span className="text-2xl font-extrabold text-primary">
             {Math.round(l.weighted_score)}
           </span>
-          <span className="text-xs ml-0.5" style={{ color: '#9ca3af' }}>/100</span>
+          <span className="text-xs ml-0.5 text-tertiary">/100</span>
         </td>
       )}
     />
   );
 
   return (
-    <div
-      className="rounded-xl border overflow-hidden"
-      style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
-    >
+    <div className="rounded-xl border overflow-hidden bg-white border-border">
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
 
@@ -148,13 +144,12 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
             <tr style={{ borderBottom: '2px solid #e8e8e8' }}>
               {/* Corner */}
               <th
-                className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
+                className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-tertiary"
                 style={{
                   position: 'sticky',
                   top: 0,
                   left: 0,
                   backgroundColor: '#ffffff',
-                  color: '#9ca3af',
                   width: DT_LABEL_W,
                   minWidth: DT_LABEL_W,
                   zIndex: 3,
@@ -183,25 +178,24 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                     }}
                   >
                     {isWinner && (
-                      <p className="text-xs font-bold mb-1" style={{ color: '#2A7F7F' }}>✦ Top Pick</p>
+                      <p className="text-xs font-bold mb-1 text-accent">✦ Top Pick</p>
                     )}
-                    <p className="text-sm font-bold leading-tight" style={{ color: '#1a1a2e' }}>
+                    <p className="text-sm font-bold leading-tight text-primary">
                       {l.name}
                     </p>
                     {(l.address || l.price) && (
-                      <p className="text-xs mt-0.5 truncate" style={{ color: '#6b7280' }}>
+                      <p className="text-xs mt-0.5 truncate text-secondary">
                         {[l.address, l.price].filter(Boolean).join(' · ')}
                       </p>
                     )}
                     <button
                       onClick={() => !saved && onSave(l, i)}
                       disabled={saved}
-                      className="mt-2 text-xs font-semibold px-2.5 py-1 rounded border transition-colors"
-                      style={
+                      className={`mt-2 text-xs font-semibold px-2.5 py-1 rounded border transition-colors ${
                         saved
-                          ? { backgroundColor: '#f3f4f6', color: '#9ca3af', borderColor: '#e8e8e8', cursor: 'default' }
-                          : { backgroundColor: '#ffffff', color: '#2A7F7F', borderColor: '#2A7F7F', cursor: 'pointer' }
-                      }
+                          ? 'bg-inactive text-tertiary border-border cursor-default'
+                          : 'bg-white text-accent border-accent cursor-pointer'
+                      }`}
                     >
                       {saved ? 'Saved ✓' : 'Save'}
                     </button>
@@ -235,17 +229,14 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                         style={dtStickyLabel(rowBg)}
                       >
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-semibold w-5 shrink-0 text-right" style={{ color: '#9ca3af' }}>
+                          <span className="text-xs font-semibold w-5 shrink-0 text-right text-tertiary">
                             {index + 1}
                           </span>
-                          <span className="text-sm font-medium leading-snug" style={{ color: '#1a1a2e' }}>
+                          <span className="text-sm font-medium leading-snug text-primary">
                             {criterion.label}
                           </span>
                           {criterion.isDisqualifier && (
-                            <span
-                              className="text-xs px-1 py-0.5 rounded font-semibold shrink-0"
-                              style={{ backgroundColor: '#ffebee', color: '#ef5350' }}
-                            >
+                            <span className="text-xs px-1 py-0.5 rounded font-semibold shrink-0 bg-score-no-bg text-score-no">
                               must
                             </span>
                           )}
@@ -270,7 +261,7 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                           >
                             <ScorePill score={score} />
                             {extra && (
-                              <div className="text-xs mt-1 truncate mx-auto" style={{ color: '#6b7280', maxWidth: DT_COL_W - 24 }}>
+                              <div className="text-xs mt-1 truncate mx-auto text-secondary" style={{ maxWidth: DT_COL_W - 24 }}>
                                 {extra}
                               </div>
                             )}
@@ -288,7 +279,7 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
             {allSaved ? (
               <tr>
                 <td colSpan={colCount} className="px-4 py-3">
-                  <span className="text-xs italic" style={{ color: '#9ca3af' }}>
+                  <span className="text-xs italic text-tertiary">
                     Strengths and concerns are not available when comparing saved listings — Claude was not called.
                   </span>
                 </td>
@@ -300,7 +291,7 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                     className="px-4 py-2.5 align-top"
                     style={dtStickyLabel('#ffffff')}
                   >
-                    <span className="text-xs font-semibold uppercase tracking-wide pl-6" style={{ color: '#43a047' }}>
+                    <span className="text-xs font-semibold uppercase tracking-wide pl-6 text-score-yes">
                       Strengths
                     </span>
                   </td>
@@ -314,12 +305,12 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                         <ul className="flex flex-col gap-0.5">
                           {l.strengths.map((s, j) => (
                             <li key={j} className="flex gap-1 items-start" style={{ color: '#374151' }}>
-                              <span style={{ color: '#43a047' }}>✓</span> {s}
+                              <span className="text-score-yes">✓</span> {s}
                             </li>
                           ))}
                         </ul>
                       ) : (
-                        <span style={{ color: '#9ca3af' }}>—</span>
+                        <span className="text-tertiary">—</span>
                       )}
                     </td>
                   ))}
@@ -329,7 +320,7 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                     className="px-4 py-2.5 align-top"
                     style={dtStickyLabel('#fafafa')}
                   >
-                    <span className="text-xs font-semibold uppercase tracking-wide pl-6" style={{ color: '#ef5350' }}>
+                    <span className="text-xs font-semibold uppercase tracking-wide pl-6 text-score-no">
                       Concerns
                     </span>
                   </td>
@@ -343,12 +334,12 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                         <ul className="flex flex-col gap-0.5">
                           {l.concerns.map((c, j) => (
                             <li key={j} className="flex gap-1 items-start" style={{ color: '#374151' }}>
-                              <span style={{ color: '#ef5350' }}>✗</span> {c}
+                              <span className="text-score-no">✗</span> {c}
                             </li>
                           ))}
                         </ul>
                       ) : (
-                        <span style={{ color: '#9ca3af' }}>—</span>
+                        <span className="text-tertiary">—</span>
                       )}
                     </td>
                   ))}
@@ -402,42 +393,32 @@ function SlotInput({ slot, index, totalSlots, savedListings, onChange, onRemove 
   const hasSaved = savedListings.length > 0;
 
   return (
-    <div
-      className="rounded-xl border p-5 flex flex-col gap-4"
-      style={{ backgroundColor: '#ffffff', borderColor: '#e8e8e8' }}
-    >
+    <div className="rounded-xl border p-5 flex flex-col gap-4 bg-white border-border">
       {/* Slot header */}
       <div className="flex items-center justify-between">
-        <span className="text-xs font-bold uppercase tracking-wide" style={{ color: '#9ca3af' }}>
+        <span className="text-xs font-bold uppercase tracking-wide text-tertiary">
           Listing {index + 1}
         </span>
 
         <div className="flex items-center gap-2">
           {/* Mode toggle pills */}
           {hasSaved && (
-            <div
-              className="flex rounded-lg overflow-hidden border text-xs font-semibold"
-              style={{ borderColor: '#e8e8e8' }}
-            >
+            <div className="flex rounded-lg overflow-hidden border text-xs font-semibold border-border">
               <button
                 onClick={() => setMode('saved')}
-                className="px-2.5 py-1 transition-colors"
-                style={
-                  slot.mode === 'saved'
-                    ? { backgroundColor: '#1a1a2e', color: '#ffffff' }
-                    : { backgroundColor: '#f9fafb', color: '#6b7280' }
-                }
+                className={`px-2.5 py-1 transition-colors ${
+                  slot.mode === 'saved' ? 'bg-primary text-white' : 'text-secondary'
+                }`}
+                style={slot.mode !== 'saved' ? { backgroundColor: '#f9fafb' } : {}}
               >
                 From saved
               </button>
               <button
                 onClick={() => setMode('new')}
-                className="px-2.5 py-1 transition-colors"
-                style={
-                  slot.mode === 'new'
-                    ? { backgroundColor: '#1a1a2e', color: '#ffffff' }
-                    : { backgroundColor: '#f9fafb', color: '#6b7280' }
-                }
+                className={`px-2.5 py-1 transition-colors ${
+                  slot.mode === 'new' ? 'bg-primary text-white' : 'text-secondary'
+                }`}
+                style={slot.mode !== 'new' ? { backgroundColor: '#f9fafb' } : {}}
               >
                 Paste new
               </button>
@@ -448,8 +429,7 @@ function SlotInput({ slot, index, totalSlots, savedListings, onChange, onRemove 
           {canRemove && (
             <button
               onClick={onRemove}
-              className="text-lg leading-none px-1 opacity-40 hover:opacity-100 transition-opacity"
-              style={{ color: '#ef5350' }}
+              className="text-lg leading-none px-1 opacity-40 hover:opacity-100 transition-opacity text-score-no"
               title="Remove this slot"
             >
               ×
@@ -467,8 +447,8 @@ function SlotInput({ slot, index, totalSlots, savedListings, onChange, onRemove 
               const found = savedListings.find(l => l.id === e.target.value) ?? null;
               onChange({ savedListing: found });
             }}
-            className="w-full rounded-lg border px-3 py-2 text-sm outline-none"
-            style={{ borderColor: '#e8e8e8', color: slot.savedListing ? '#1a1a2e' : '#9ca3af', backgroundColor: '#ffffff', cursor: 'pointer' }}
+            className="w-full rounded-lg border px-3 py-2 text-sm outline-none border-border bg-white cursor-pointer"
+            style={{ color: slot.savedListing ? '#1a1a2e' : '#9ca3af' }}
           >
             <option value="">Select a saved listing…</option>
             {savedListings.map(l => (
@@ -485,9 +465,9 @@ function SlotInput({ slot, index, totalSlots, savedListings, onChange, onRemove 
               style={{ backgroundColor: '#f7f7f5' }}
             >
               <div>
-                <span className="font-medium" style={{ color: '#1a1a2e' }}>{slot.savedListing.name}</span>
+                <span className="font-medium text-primary">{slot.savedListing.name}</span>
                 {slot.savedListing.price && (
-                  <span className="ml-2" style={{ color: '#6b7280' }}>{slot.savedListing.price}</span>
+                  <span className="ml-2 text-secondary">{slot.savedListing.price}</span>
                 )}
               </div>
               <VerdictBadge verdict={slot.savedListing.verdict} size="sm" />
@@ -504,8 +484,7 @@ function SlotInput({ slot, index, totalSlots, savedListings, onChange, onRemove 
             value={slot.urlOrLabel}
             onChange={e => onChange({ urlOrLabel: e.target.value })}
             placeholder="Zillow URL or nickname (optional)"
-            className="w-full rounded-lg border px-3 py-2 text-sm outline-none"
-            style={{ borderColor: '#e8e8e8', color: '#1a1a2e' }}
+            className="w-full rounded-lg border px-3 py-2 text-sm outline-none border-border text-primary"
             onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
             onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
           />
@@ -514,8 +493,7 @@ function SlotInput({ slot, index, totalSlots, savedListings, onChange, onRemove 
             onChange={e => onChange({ text: e.target.value })}
             placeholder="Paste the full listing text here…"
             rows={5}
-            className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-none"
-            style={{ borderColor: '#e8e8e8', color: '#1a1a2e' }}
+            className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-none border-border text-primary"
             onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
             onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
           />
@@ -534,39 +512,35 @@ function ResultCard({ result, isWinner, criteria, alreadySaved, isSaved, onSave 
 
   return (
     <div
-      className="rounded-xl border flex flex-col overflow-hidden"
+      className="rounded-xl border flex flex-col overflow-hidden bg-white"
       style={{
-        backgroundColor: '#ffffff',
         borderColor: isWinner ? '#2A7F7F' : '#e8e8e8',
         borderWidth: isWinner ? '2px' : '1px',
       }}
     >
       {/* Winner badge */}
       {isWinner && (
-        <div
-          className="px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-center"
-          style={{ backgroundColor: '#2A7F7F', color: '#ffffff' }}
-        >
+        <div className="px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-center bg-accent text-white">
           ✦ Top Pick
         </div>
       )}
 
       {/* Header */}
-      <div className="px-5 pt-5 pb-4 border-b" style={{ borderColor: '#f3f4f6' }}>
+      <div className="px-5 pt-5 pb-4 border-b border-inactive">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="text-base font-bold leading-tight" style={{ color: '#1a1a2e' }}>
+          <h3 className="text-base font-bold leading-tight text-primary">
             {result.name}
           </h3>
           <VerdictBadge verdict={result.verdict} size="sm" />
         </div>
-        <p className="text-xs mb-3" style={{ color: '#6b7280' }}>
+        <p className="text-xs mb-3 text-secondary">
           {[result.address, result.price].filter(Boolean).join(' · ')}
         </p>
         <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-extrabold" style={{ color: '#1a1a2e' }}>
+          <span className="text-3xl font-extrabold text-primary">
             {Math.round(result.weighted_score)}
           </span>
-          <span className="text-xs" style={{ color: '#9ca3af' }}>/100</span>
+          <span className="text-xs text-tertiary">/100</span>
         </div>
       </div>
 
@@ -579,13 +553,13 @@ function ResultCard({ result, isWinner, criteria, alreadySaved, isSaved, onSave 
         {/* Strengths */}
         {result.strengths?.length > 0 && (
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: '#43a047' }}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-1.5 text-score-yes">
               Strengths
             </p>
             <ul className="flex flex-col gap-1">
               {result.strengths.map((s, i) => (
                 <li key={i} className="text-sm flex gap-1.5 items-start" style={{ color: '#374151' }}>
-                  <span style={{ color: '#43a047' }}>✓</span> {s}
+                  <span className="text-score-yes">✓</span> {s}
                 </li>
               ))}
             </ul>
@@ -595,13 +569,13 @@ function ResultCard({ result, isWinner, criteria, alreadySaved, isSaved, onSave 
         {/* Concerns */}
         {result.concerns?.length > 0 && (
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: '#ef5350' }}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-1.5 text-score-no">
               Concerns
             </p>
             <ul className="flex flex-col gap-1">
               {result.concerns.map((c, i) => (
                 <li key={i} className="text-sm flex gap-1.5 items-start" style={{ color: '#374151' }}>
-                  <span style={{ color: '#ef5350' }}>✗</span> {c}
+                  <span className="text-score-no">✗</span> {c}
                 </li>
               ))}
             </ul>
@@ -610,20 +584,14 @@ function ResultCard({ result, isWinner, criteria, alreadySaved, isSaved, onSave 
 
         {/* Neighborhood note */}
         {neighborhoodNote && (
-          <div
-            className="rounded-lg px-3 py-2 text-xs border-l-4"
-            style={{ backgroundColor: '#e0f2f1', borderLeftColor: '#2A7F7F', color: '#00695c' }}
-          >
+          <div className="rounded-lg px-3 py-2 text-xs border-l-4 bg-callout-bg border-l-accent text-callout-text">
             <span className="font-semibold">📍 </span>{neighborhoodNote}
           </div>
         )}
 
         {/* Ceiling height */}
         {ceilingQuote && (
-          <div
-            className="rounded-lg px-3 py-2 text-xs border-l-4"
-            style={{ backgroundColor: '#e8f5e9', borderLeftColor: '#43a047', color: '#2e7d32' }}
-          >
+          <div className="rounded-lg px-3 py-2 text-xs border-l-4 bg-score-yes-bg border-l-score-yes" style={{ color: '#2e7d32' }}>
             <span className="font-semibold">⬆️ </span>&ldquo;{ceilingQuote}&rdquo;
           </div>
         )}
@@ -634,12 +602,11 @@ function ResultCard({ result, isWinner, criteria, alreadySaved, isSaved, onSave 
         <button
           onClick={onSave}
           disabled={alreadySaved || isSaved}
-          className="w-full py-2 rounded-lg text-sm font-semibold border transition-colors"
-          style={
+          className={`w-full py-2 rounded-lg text-sm font-semibold border transition-colors ${
             alreadySaved || isSaved
-              ? { backgroundColor: '#f3f4f6', color: '#9ca3af', borderColor: '#e8e8e8', cursor: 'default' }
-              : { backgroundColor: '#ffffff', color: '#2A7F7F', borderColor: '#2A7F7F', cursor: 'pointer' }
-          }
+              ? 'bg-inactive text-tertiary border-border cursor-default'
+              : 'bg-white text-accent border-accent cursor-pointer'
+          }`}
         >
           {alreadySaved ? 'Already saved ✓' : isSaved ? 'Saved ✓' : 'Save listing'}
         </button>
@@ -762,7 +729,6 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
       }
 
       // Mixed mode (at least one new listing) — call Claude.
-      // For saved slots, pass a brief summary instead of rawText to avoid oversized prompts.
       const promptSlots = slots.map(slot => {
         if (slot.mode === 'saved' && slot.savedListing) {
           const l = slot.savedListing;
@@ -811,10 +777,9 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
     setSavedIndices(prev => new Set([...prev, slotIndex]));
   }
 
-  // Check if a slot's listing is already in the saved list (by rawText or ID)
   function isAlreadySaved(slotIndex) {
     const slot = slots[slotIndex];
-    if (slot.mode === 'saved' && slot.savedListing) return true; // it's from saved — already there
+    if (slot.mode === 'saved' && slot.savedListing) return true;
     if (slot.mode === 'new') {
       return listings.some(l => l.rawText === slot.text);
     }
@@ -845,8 +810,7 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
         <div className="mb-5">
           <button
             onClick={addSlot}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg border text-sm font-medium transition-colors"
-            style={{ borderColor: '#e8e8e8', color: '#6b7280', backgroundColor: '#ffffff' }}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg border text-sm font-medium transition-colors border-border text-secondary bg-white"
           >
             <span className="text-lg leading-none">+</span>
             Add listing
@@ -859,17 +823,16 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
         <button
           onClick={handleCompare}
           disabled={!canCompare}
-          className="flex items-center justify-center gap-2 px-8 py-3 rounded-lg text-sm font-semibold transition-colors"
-          style={{
-            backgroundColor: canCompare ? '#1a1a2e' : '#e8e8e8',
-            color: canCompare ? '#ffffff' : '#9ca3af',
-            cursor: canCompare ? 'pointer' : 'default',
-          }}
+          className={`flex items-center justify-center gap-2 px-8 py-3 rounded-lg text-sm font-semibold transition-colors ${
+            canCompare
+              ? 'bg-primary text-white cursor-pointer'
+              : 'bg-border text-tertiary cursor-default'
+          }`}
         >
           {isLoading ? <><Spinner /> Comparing…</> : 'Compare Listings'}
         </button>
         {validCount < 2 && !isLoading && (
-          <p className="mt-2 text-sm" style={{ color: '#9ca3af' }}>
+          <p className="mt-2 text-sm text-tertiary">
             Add at least 2 listings to compare
           </p>
         )}
@@ -879,7 +842,7 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
           </p>
         )}
         {criteria.length === 0 && (
-          <p className="mt-2 text-sm" style={{ color: '#ef5350' }}>
+          <p className="mt-2 text-sm text-score-no">
             No criteria set — open ⚙ Settings to add at least one before comparing.
           </p>
         )}
@@ -887,10 +850,7 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
 
       {/* ── Error ── */}
       {error && (
-        <div
-          className="rounded-xl px-4 py-3 mb-6 flex items-start gap-3 border-l-4"
-          style={{ backgroundColor: '#ffebee', borderLeftColor: '#ef5350' }}
-        >
+        <div className="rounded-xl px-4 py-3 mb-6 flex items-start gap-3 border-l-4 bg-score-no-bg border-l-score-no">
           <span className="text-lg leading-none mt-0.5">⚠</span>
           <div>
             <p className="text-sm font-medium" style={{ color: '#c62828' }}>{error}</p>
@@ -910,41 +870,34 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
         <div>
           {/* Winner banner */}
           {results.listings?.[winnerIndex] && (
-            <div
-              className="rounded-xl px-6 py-5 mb-6"
-              style={{ backgroundColor: '#1a1a2e' }}
-            >
-              <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: '#2A7F7F' }}>
+            <div className="rounded-xl px-6 py-5 mb-6 bg-primary">
+              <p className="text-xs font-bold uppercase tracking-wider mb-1 text-accent">
                 ✦ Top Pick
               </p>
-              <p className="text-xl font-bold mb-1" style={{ color: '#ffffff' }}>
+              <p className="text-xl font-bold mb-1 text-white">
                 {results.listings[winnerIndex].name}
               </p>
               {results.winner_reason && (
-                <p className="text-sm" style={{ color: '#9ca3af' }}>{results.winner_reason}</p>
+                <p className="text-sm text-tertiary">{results.winner_reason}</p>
               )}
             </div>
           )}
 
           {/* View toggle */}
           <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-semibold" style={{ color: '#1a1a2e' }}>
+            <p className="text-sm font-semibold text-primary">
               Results
             </p>
-            <div
-              className="flex rounded-lg border overflow-hidden"
-              style={{ borderColor: '#e8e8e8' }}
-            >
+            <div className="flex rounded-lg border overflow-hidden border-border">
               {[{ mode: 'card', label: 'Cards' }, { mode: 'table', label: 'Table' }].map(({ mode, label }) => (
                 <button
                   key={mode}
                   onClick={() => setResultsView(mode)}
-                  className="px-3 py-1.5 text-xs font-semibold transition-colors"
-                  style={
+                  className={`px-3 py-1.5 text-xs font-semibold transition-colors ${
                     resultsView === mode
-                      ? { backgroundColor: '#1a1a2e', color: '#ffffff' }
-                      : { backgroundColor: '#ffffff', color: '#9ca3af' }
-                  }
+                      ? 'bg-primary text-white'
+                      : 'bg-white text-tertiary'
+                  }`}
                 >
                   {label}
                 </button>
@@ -983,7 +936,7 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
             </div>
           )}
 
-          {/* Save all button — only for new slots not yet saved, card view only */}
+          {/* Save all button */}
           {resultsView === 'card' && results.listings?.some((_, i) => !isAlreadySaved(i) && !savedIndices.has(i)) && (
             <div className="flex justify-end mb-4">
               <button
@@ -994,8 +947,7 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
                     }
                   });
                 }}
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
-                style={{ backgroundColor: '#2A7F7F' }}
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-accent"
               >
                 Save all listings
               </button>
@@ -1005,10 +957,10 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
           {/* Tradeoff note */}
           {results.tradeoff_note && (
             <div
-              className="rounded-xl px-5 py-4 border-l-4"
-              style={{ backgroundColor: '#fff8e1', borderLeftColor: '#ffb300' }}
+              className="rounded-xl px-5 py-4 border-l-4 bg-score-unclear-bg"
+              style={{ borderLeftColor: '#ffb300' }}
             >
-              <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: '#e65100' }}>
+              <p className="text-xs font-semibold uppercase tracking-wide mb-1 text-score-unclear">
                 Key tradeoff
               </p>
               <p className="text-sm" style={{ color: '#374151' }}>{results.tradeoff_note}</p>

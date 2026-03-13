@@ -7,19 +7,16 @@
  */
 export default function VerdictBadge({ verdict, size = 'md' }) {
   const styles = {
-    apply: { backgroundColor: '#1a1a2e', color: '#ffffff', label: '✦ Apply' },
-    tour:  { backgroundColor: '#1565c0', color: '#ffffff', label: '◎ Tour' },
-    skip:  { backgroundColor: '#f3f4f6', color: '#9ca3af', label: '✕ Skip' },
+    apply: { cls: 'bg-primary text-white', label: '✦ Apply' },
+    tour:  { cls: 'bg-verdict-tour text-white', label: '◎ Tour' },
+    skip:  { cls: 'bg-inactive text-tertiary', label: '✕ Skip' },
   };
 
   const s = styles[verdict] ?? styles.skip;
   const padding = size === 'sm' ? 'px-2.5 py-0.5 text-xs' : 'px-3.5 py-1 text-sm';
 
   return (
-    <span
-      className={`inline-block rounded-full font-semibold ${padding}`}
-      style={{ backgroundColor: s.backgroundColor, color: s.color, cursor: 'default' }}
-    >
+    <span className={`inline-block rounded-full font-semibold cursor-default ${padding} ${s.cls}`}>
       {s.label}
     </span>
   );
