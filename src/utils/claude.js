@@ -12,7 +12,7 @@
  */
 
 import { calculateWeights } from './scoring';
-import { CRITERION_DESCRIPTIONS } from '../constants/defaultCriteria';
+import { CRITERION_DESCRIPTIONS, CRITERIA_LIBRARY } from '../constants/defaultCriteria';
 
 /**
  * Build the system prompt Claude receives before every analysis.
@@ -28,6 +28,12 @@ export function buildSystemPrompt(criteria, location = 'Green Lake, Seattle') {
   const weighted = calculateWeights(criteria);
   const scoredCriteria = weighted.filter(c => !c.flagOnly);
   const flagCriteria = criteria.filter(c => c.flagOnly);
+
+  // Inactive library items — in the library but not in the user's active criteria.
+  // Claude extracts a brief note for each; they do NOT affect the numeric score.
+  const activeKeys = new Set(criteria.map(c => c.key));
+  const allLibraryItems = CRITERIA_LIBRARY.flatMap(g => g.items);
+  const inactiveLibraryItems = allLibraryItems.filter(item => !activeKeys.has(item.key));
 
   // Build the "Scoring rules:" lines
   const scoringLines = scoredCriteria.map(c => {
@@ -49,6 +55,12 @@ export function buildSystemPrompt(criteria, location = 'Green Lake, Seattle') {
     return `- ${c.key} (flag only): ${description}`;
   });
 
+  // Note-extraction lines for inactive library items
+  const noteLines = inactiveLibraryItems.map(item => {
+    const description = CRITERION_DESCRIPTIONS[item.key] ?? item.label;
+    return `- ${item.key}: ${description}`;
+  });
+
   // Build a template showing Claude exactly which keys to return in scores{}
   const scoresTemplate = {};
   scoredCriteria.forEach(c => {
@@ -57,6 +69,13 @@ export function buildSystemPrompt(criteria, location = 'Green Lake, Seattle') {
   flagCriteria.forEach(c => {
     scoresTemplate[c.key] = 'exact quote from listing or null';
   });
+  inactiveLibraryItems.forEach(item => {
+    scoresTemplate[item.key] = 'short extracted phrase or "Not mentioned"';
+  });
+
+  const noteSection = noteLines.length > 0
+    ? `\nNote extraction (do NOT score these — extract info only, never yes/no/unclear):\n${noteLines.join('\n')}\nFor note items return a short phrase (15 words max) describing what the listing says, or "Not mentioned" if absent. These NEVER affect weighted_score.\n`
+    : '';
 
   return `You are an apartment research assistant helping a junior UX designer find housing near ${location}.
 
@@ -65,7 +84,7 @@ Analyze the listing(s) provided and respond ONLY with valid JSON. No markdown, n
 Scoring rules:
 ${scoringLines.join('\n')}
 ${flagLines.join('\n')}
-
+${noteSection}
 Score each criterion as "yes" | "no" | "unclear". Never assume yes if not stated.
 
 For browse mode (single listing) return:

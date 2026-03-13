@@ -301,7 +301,7 @@ export default function ExportModal({ listings, criteria, onClose }) {
                           >
                             {c.label}
                             {c.inactive && (
-                              <em className="not-italic font-normal" style={{ color: '#9ca3af' }}> (unscored)</em>
+                              <em className="not-italic font-normal" style={{ color: '#9ca3af' }}> (note)</em>
                             )}
                             {!c.inactive && c.flagOnly && (
                               <em className="not-italic font-normal" style={{ color: '#9ca3af' }}> (note)</em>
