@@ -21,9 +21,10 @@
  *   onGoToBrowse      — fn() → switches to Browse tab (used in empty state)
  */
 import { useState, useMemo } from 'react';
-import { SlidersHorizontal, ChevronDown, ChevronUp } from 'lucide-react';
+import { SlidersHorizontal, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import EmptyState from '../EmptyState';
 import ListingCard from '../ListingCard';
+import ExportModal from '../ExportModal';
 
 // ─────────────────────────────────────────────────────────────
 // Constants
@@ -307,6 +308,7 @@ export default function SavedTab({
   compareQueue, onToggleCompare, onClearCompareQueue,
 }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   function toggleCompare(listing) {
     onToggleCompare(listing.id);
@@ -400,7 +402,7 @@ export default function SavedTab({
     <div className="mx-auto pb-24" style={{ maxWidth: '780px' }}>
       <SummaryBar listings={listings} statusFilter={filters.statusFilter} onSetFilter={onSetFilter} />
 
-      {/* ── Always-visible search + sort ── */}
+      {/* ── Always-visible search + sort + export ── */}
       <div className="flex flex-col sm:flex-row gap-3 mb-3">
         <input
           type="text"
@@ -420,6 +422,16 @@ export default function SavedTab({
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
+        <button
+          onClick={() => setExportOpen(true)}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-semibold transition-colors border-border text-secondary bg-white shrink-0"
+          onMouseEnter={e => { e.currentTarget.style.borderColor = '#2A7F7F'; e.currentTarget.style.color = '#2A7F7F'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e8e8e8'; e.currentTarget.style.color = '#6b7280'; }}
+          title="Export listings to CSV"
+        >
+          <Download size={15} />
+          Export
+        </button>
       </div>
 
       {/* ── Collapsible filter panel ── */}
@@ -486,6 +498,15 @@ export default function SavedTab({
             />
           ))}
         </div>
+      )}
+
+      {/* ── Export modal ── */}
+      {exportOpen && (
+        <ExportModal
+          listings={listings}
+          criteria={criteria}
+          onClose={() => setExportOpen(false)}
+        />
       )}
 
       {/* ── Sticky compare bar ── */}
