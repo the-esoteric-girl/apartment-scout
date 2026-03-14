@@ -68,8 +68,8 @@ function SortableRow({
       <button
         {...attributes}
         {...listeners}
-        className="flex-shrink-0 cursor-grab active:cursor-grabbing touch-none select-none"
-        style={{ color: '#d1d5db', lineHeight: 1 }}
+        className="flex-shrink-0 cursor-grab active:cursor-grabbing touch-none select-none text-faint"
+        style={{ lineHeight: 1 }}
         aria-label="Drag to reorder"
         tabIndex={-1}
       >
@@ -135,10 +135,9 @@ function SortableRow({
       <button
         onClick={() => onDelete(criterion.key)}
         disabled={!canDelete}
-        className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-lg transition-colors"
-        style={{ color: canDelete ? '#d1d5db' : '#e5e7eb' }}
-        onMouseEnter={e => { if (canDelete) e.currentTarget.style.color = '#ef5350'; }}
-        onMouseLeave={e => { e.currentTarget.style.color = canDelete ? '#d1d5db' : '#e5e7eb'; }}
+        className={`flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-lg transition-colors ${
+          canDelete ? 'text-faint hover:text-score-no' : 'text-gray-200'
+        }`}
         title={canDelete ? 'Remove criterion' : 'Must have at least one criterion'}
         aria-label="Remove criterion"
       >

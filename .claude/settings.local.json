@@ -5,7 +5,8 @@
       "Skill(gsd:plan-phase)",
       "Skill(gsd:plan-phase:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(grep -rn \"#[0-9a-fA-F]\\\\{3,6\\\\}\" c:/Users/sophi/Projects/apartment-scout/src --include=\"*.jsx\")"
     ]
   }
 }

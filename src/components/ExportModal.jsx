@@ -173,14 +173,12 @@ export default function ExportModal({ listings, criteria, onClose }) {
         {/* ── Header ─────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2">
-            <Download size={16} style={{ color: '#2A7F7F' }} />
+            <Download size={16} className="text-accent" />
             <h2 className="text-base font-bold text-primary">Export to CSV</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg transition-colors text-tertiary"
-            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
-            onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+            className="p-1.5 rounded-lg transition-colors text-tertiary hover:bg-inactive"
             aria-label="Close"
           >
             <X size={17} />
@@ -216,9 +214,7 @@ export default function ExportModal({ listings, criteria, onClose }) {
                 return (
                   <label
                     key={listing.id}
-                    className="flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors bg-white"
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f9fafb')}
-                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'white')}
+                    className="flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors bg-white hover:bg-gray-50"
                   >
                     <input
                       type="checkbox"
@@ -233,14 +229,13 @@ export default function ExportModal({ listings, criteria, onClose }) {
                       {listing.weighted_score}/100
                     </span>
                     <span
-                      className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 capitalize"
-                      style={
+                      className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 capitalize ${
                         listing.verdict === 'apply'
-                          ? { backgroundColor: '#e8f5e9', color: '#43a047' }
+                          ? 'bg-score-yes-bg text-score-yes'
                           : listing.verdict === 'tour'
-                          ? { backgroundColor: '#e3f2fd', color: '#1565c0' }
-                          : { backgroundColor: '#ffebee', color: '#ef5350' }
-                      }
+                          ? 'bg-verdict-tour-bg text-verdict-tour'
+                          : 'bg-score-no-bg text-score-no'
+                      }`}
                     >
                       {listing.verdict}
                     </span>
@@ -271,8 +266,7 @@ export default function ExportModal({ listings, criteria, onClose }) {
               {groupedCriteria.map(group => (
                 <div key={group.category}>
                   {/* Category header */}
-                  <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
-                    style={{ color: '#9ca3af' }}>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 text-tertiary">
                     {group.category}
                   </p>
 
@@ -283,11 +277,9 @@ export default function ExportModal({ listings, criteria, onClose }) {
                       return (
                         <label
                           key={c.key}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all"
-                          style={{
-                            borderColor: isChecked ? '#2A7F7F' : '#e8e8e8',
-                            backgroundColor: isChecked ? '#f0fafa' : 'white',
-                          }}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                            isChecked ? 'border-accent bg-accent-subtle' : 'border-border bg-white'
+                          }`}
                         >
                           <input
                             type="checkbox"
@@ -295,16 +287,10 @@ export default function ExportModal({ listings, criteria, onClose }) {
                             onChange={() => toggleCriterion(c.key)}
                             className="shrink-0"
                           />
-                          <span
-                            className="text-sm truncate flex-1"
-                            style={{ color: c.inactive ? '#9ca3af' : 'inherit' }}
-                          >
+                          <span className={`text-sm truncate flex-1 ${c.inactive ? 'text-tertiary' : ''}`}>
                             {c.label}
-                            {c.inactive && (
-                              <em className="not-italic font-normal" style={{ color: '#9ca3af' }}> (note)</em>
-                            )}
-                            {!c.inactive && c.flagOnly && (
-                              <em className="not-italic font-normal" style={{ color: '#9ca3af' }}> (note)</em>
+                            {(c.inactive || c.flagOnly) && (
+                              <em className="not-italic font-normal text-tertiary"> (note)</em>
                             )}
                           </span>
                         </label>
@@ -325,11 +311,9 @@ export default function ExportModal({ listings, criteria, onClose }) {
               {FORMAT_OPTIONS.map(opt => (
                 <label
                   key={opt.value}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg border cursor-pointer transition-all"
-                  style={{
-                    borderColor: scoreFormat === opt.value ? '#2A7F7F' : '#e8e8e8',
-                    backgroundColor: scoreFormat === opt.value ? '#f0fafa' : 'white',
-                  }}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border cursor-pointer transition-all ${
+                    scoreFormat === opt.value ? 'border-accent bg-accent-subtle' : 'border-border bg-white'
+                  }`}
                 >
                   <input
                     type="radio"
@@ -352,21 +336,18 @@ export default function ExportModal({ listings, criteria, onClose }) {
         <div className="flex items-center justify-between gap-3 px-5 py-4 border-t border-border bg-white shrink-0">
           <button
             onClick={onClose}
-            className="text-sm font-medium px-4 py-2 rounded-lg border border-border text-secondary transition-colors"
-            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
-            onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+            className="text-sm font-medium px-4 py-2 rounded-lg border border-border text-secondary transition-colors hover:bg-inactive"
           >
             Cancel
           </button>
           <button
             onClick={handleExport}
             disabled={!canExport}
-            className="flex items-center gap-2 text-sm font-bold px-5 py-2 rounded-lg transition-colors"
-            style={
+            className={`flex items-center gap-2 text-sm font-bold px-5 py-2 rounded-lg transition-colors ${
               canExport
-                ? { backgroundColor: '#2A7F7F', color: '#ffffff', cursor: 'pointer' }
-                : { backgroundColor: '#e5e7eb', color: '#9ca3af', cursor: 'default' }
-            }
+                ? 'bg-accent text-white cursor-pointer'
+                : 'bg-gray-200 text-tertiary cursor-default'
+            }`}
           >
             <Download size={15} />
             Export {exportCount} listing{exportCount !== 1 ? 's' : ''}

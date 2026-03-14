@@ -186,7 +186,7 @@ export default function App() {
   const savedCount = listings.length;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f7f7f5' }}>
+    <div className="min-h-screen bg-app-bg">
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 border-b bg-white border-border">

@@ -22,10 +22,42 @@ export default {
 
         // Verdict colors
         'verdict-tour':     '#1565c0',
+        'verdict-tour-bg':  '#e3f2fd',
+
+        // Accent tint (checked/selected state backgrounds)
+        'accent-subtle':    '#f0fafa',
+
+        // App surface
+        'app-bg':           '#f7f7f5',
 
         // Neighborhood callout
         'callout-bg':       '#e0f2f1',
         'callout-text':     '#00695c',
+        'callout-yes-text': '#2e7d32',
+
+        // Error (deep red, darker than score-no)
+        'error':            '#c62828',
+
+        // Amber warning
+        'warning':          '#ffb300',
+
+        // Prose / body text
+        'prose':            '#374151',
+
+        // Muted / disabled UI elements
+        'faint':            '#d1d5db',
+
+        // Table layout
+        'row-alt':          '#fafafa',
+        'winner-cell':      '#f5fffe',
+        'row-dq':           '#fff5f5',
+
+        // Status pill colors
+        'status-toured-bg':     '#dbeafe',
+        'status-applied-bg':    '#ccfbf1',
+        'status-applied-text':  '#0f766e',
+        'status-rejected-bg':   '#fee2e2',
+        'status-rejected-text': '#dc2626',
       },
       fontFamily: {
         sans: ['DM Sans', 'sans-serif'],

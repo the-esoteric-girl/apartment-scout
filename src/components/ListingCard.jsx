@@ -12,114 +12,160 @@
  *   onDelete(id)      — remove listing
  *   onUseInDecision   — fn(listing) opens Decision tab with this listing pre-loaded
  */
-import { useState, useRef, useEffect } from 'react';
-import { Trash2 } from 'lucide-react';
-import ScoreCard from './ScoreCard';
-import VerdictBadge from './VerdictBadge';
-import { calculateWeightedScore, calculateVerdict } from '../utils/scoring';
+import { useState, useRef, useEffect } from "react";
+import { Trash2 } from "lucide-react";
+import ScoreCard from "./ScoreCard";
+import VerdictBadge from "./VerdictBadge";
+import { calculateWeightedScore, calculateVerdict } from "../utils/scoring";
 
 // ─────────────────────────────────────────────────────────────
 // Status config
 // ─────────────────────────────────────────────────────────────
 const STATUSES = [
-  { value: 'considering', label: 'Considering' },
-  { value: 'toured',      label: 'Toured' },
-  { value: 'applied',     label: 'Applied' },
-  { value: 'rejected',    label: 'Rejected' },
+  { value: "considering", label: "Considering" },
+  { value: "toured", label: "Toured" },
+  { value: "applied", label: "Applied" },
+  { value: "rejected", label: "Rejected" },
 ];
 
-const STATUS_ACTIVE_STYLE = {
-  considering: { backgroundColor: '#f3f4f6', color: '#374151' },
-  toured:      { backgroundColor: '#dbeafe', color: '#1565c0' },
-  applied:     { backgroundColor: '#ccfbf1', color: '#0f766e' },
-  rejected:    { backgroundColor: '#fee2e2', color: '#dc2626' },
+const STATUS_ACTIVE_CLASS = {
+  considering: "bg-inactive text-prose",
+  toured: "bg-status-toured-bg text-verdict-tour",
+  applied: "bg-status-applied-bg text-status-applied-text",
+  rejected: "bg-status-rejected-bg text-status-rejected-text",
 };
 
 // ─────────────────────────────────────────────────────────────
 // Pet policy display
 // ─────────────────────────────────────────────────────────────
 const PET_STYLES = {
-  safe:    { bg: '#e8f5e9', border: '#43a047', color: '#2e7d32', icon: '🐱', label: 'Cat-friendly' },
-  risk:    { bg: '#ffebee', border: '#ef5350', color: '#c62828', icon: '⚠️', label: 'Pet risk — check policy' },
-  unknown: { bg: '#fff8e1', border: '#ffb300', color: '#e65100', icon: '❓', label: 'Pet policy unknown' },
+  safe: {
+    className: "bg-score-yes-bg border-l-score-yes text-callout-yes-text",
+    icon: "🐱",
+    label: "Cat-friendly",
+  },
+  risk: {
+    className: "bg-score-no-bg border-l-score-no text-error",
+    icon: "⚠️",
+    label: "Pet risk — check policy",
+  },
+  unknown: {
+    className: "bg-score-unclear-bg border-l-warning text-score-unclear",
+    icon: "❓",
+    label: "Pet policy unknown",
+  },
 };
 
-function Callout({ bg, border, color, children }) {
+function Callout({ className, children }) {
   return (
-    <div
-      className="rounded-lg px-4 py-3 text-sm border-l-4"
-      style={{ backgroundColor: bg, borderLeftColor: border, color }}
-    >
+    <div className={`rounded-lg px-4 py-3 text-sm border-l-4 ${className}`}>
       {children}
     </div>
   );
 }
 
 function formatDate(isoString) {
-  if (!isoString) return '';
-  return new Date(isoString).toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric',
+  if (!isoString) return "";
+  return new Date(isoString).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 }
 
 // ─────────────────────────────────────────────────────────────
 // Main component
 // ─────────────────────────────────────────────────────────────
-export default function ListingCard({ listing, criteria, onUpdate, onDelete, onUseInDecision, onAddToCompare, inCompareQueue }) {
+export default function ListingCard({
+  listing,
+  criteria,
+  onUpdate,
+  onDelete,
+  onUseInDecision,
+  onAddToCompare,
+  inCompareQueue,
+}) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [localNotes, setLocalNotes] = useState(listing.notes ?? '');
+  const [localNotes, setLocalNotes] = useState(listing.notes ?? "");
 
   // Inline-edit state: name, address, price
-  const [isEditingName, setIsEditingName]       = useState(false);
-  const [editName, setEditName]                 = useState(listing.name);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editName, setEditName] = useState(listing.name);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
-  const [editAddress, setEditAddress]           = useState(listing.address ?? '');
-  const [isEditingPrice, setIsEditingPrice]     = useState(false);
-  const [editPrice, setEditPrice]               = useState(listing.price ?? '');
+  const [editAddress, setEditAddress] = useState(listing.address ?? "");
+  const [isEditingPrice, setIsEditingPrice] = useState(false);
+  const [editPrice, setEditPrice] = useState(listing.price ?? "");
 
-  const nameInputRef    = useRef(null);
+  const nameInputRef = useRef(null);
   const addressInputRef = useRef(null);
-  const priceInputRef   = useRef(null);
+  const priceInputRef = useRef(null);
 
   // Focus inputs when editing starts
-  useEffect(() => { if (isEditingName)    nameInputRef.current?.focus();    }, [isEditingName]);
-  useEffect(() => { if (isEditingAddress) addressInputRef.current?.focus(); }, [isEditingAddress]);
-  useEffect(() => { if (isEditingPrice)   priceInputRef.current?.focus();   }, [isEditingPrice]);
+  useEffect(() => {
+    if (isEditingName) nameInputRef.current?.focus();
+  }, [isEditingName]);
+  useEffect(() => {
+    if (isEditingAddress) addressInputRef.current?.focus();
+  }, [isEditingAddress]);
+  useEffect(() => {
+    if (isEditingPrice) priceInputRef.current?.focus();
+  }, [isEditingPrice]);
 
   // Generic commit/cancel helpers
   function commitField(field, value, original, setEditing, resetValue) {
-    const trimmed = typeof value === 'string' ? value.trim() : value;
+    const trimmed = typeof value === "string" ? value.trim() : value;
     if (trimmed !== original) onUpdate(listing.id, { [field]: trimmed });
     else resetValue(original);
     setEditing(false);
   }
 
   function handleFieldKeyDown(e, commit, cancel) {
-    if (e.key === 'Enter') commit();
-    if (e.key === 'Escape') cancel();
+    if (e.key === "Enter") commit();
+    if (e.key === "Escape") cancel();
   }
 
   // Per-field helpers
   function commitNameEdit() {
-    commitField('name', editName, listing.name, setIsEditingName, setEditName);
+    commitField("name", editName, listing.name, setIsEditingName, setEditName);
   }
   function handleNameKeyDown(e) {
-    handleFieldKeyDown(e, commitNameEdit, () => { setEditName(listing.name); setIsEditingName(false); });
+    handleFieldKeyDown(e, commitNameEdit, () => {
+      setEditName(listing.name);
+      setIsEditingName(false);
+    });
   }
 
   function commitAddressEdit() {
-    commitField('address', editAddress, listing.address ?? '', setIsEditingAddress, setEditAddress);
+    commitField(
+      "address",
+      editAddress,
+      listing.address ?? "",
+      setIsEditingAddress,
+      setEditAddress,
+    );
   }
   function handleAddressKeyDown(e) {
-    handleFieldKeyDown(e, commitAddressEdit, () => { setEditAddress(listing.address ?? ''); setIsEditingAddress(false); });
+    handleFieldKeyDown(e, commitAddressEdit, () => {
+      setEditAddress(listing.address ?? "");
+      setIsEditingAddress(false);
+    });
   }
 
   function commitPriceEdit() {
-    commitField('price', editPrice, listing.price ?? '', setIsEditingPrice, setEditPrice);
+    commitField(
+      "price",
+      editPrice,
+      listing.price ?? "",
+      setIsEditingPrice,
+      setEditPrice,
+    );
   }
   function handlePriceKeyDown(e) {
-    handleFieldKeyDown(e, commitPriceEdit, () => { setEditPrice(listing.price ?? ''); setIsEditingPrice(false); });
+    handleFieldKeyDown(e, commitPriceEdit, () => {
+      setEditPrice(listing.price ?? "");
+      setIsEditingPrice(false);
+    });
   }
 
   function handleStatusChange(status) {
@@ -136,7 +182,11 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
     const newScores = { ...listing.scores, [key]: newScore };
     const newWeightedScore = calculateWeightedScore(newScores, criteria);
     const newVerdict = calculateVerdict(newScores, criteria, newWeightedScore);
-    onUpdate(listing.id, { scores: newScores, weighted_score: newWeightedScore, verdict: newVerdict });
+    onUpdate(listing.id, {
+      scores: newScores,
+      weighted_score: newWeightedScore,
+      verdict: newVerdict,
+    });
   }
 
   const petPolicy = listing.scores?.pet_policy;
@@ -148,7 +198,6 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
     <div className="rounded-xl border overflow-hidden bg-white border-border">
       {/* ── Collapsed row ── */}
       <div className="px-5 py-4">
-
         {/* Top row: name + score + verdict */}
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
@@ -157,15 +206,17 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
               <input
                 ref={nameInputRef}
                 value={editName}
-                onChange={e => setEditName(e.target.value)}
+                onChange={(e) => setEditName(e.target.value)}
                 onBlur={commitNameEdit}
                 onKeyDown={handleNameKeyDown}
-                className="text-base font-bold rounded px-1 -mx-1 outline-none border-b-2 w-full text-primary"
-                style={{ borderBottomColor: '#2A7F7F', backgroundColor: 'transparent' }}
+                className="text-base font-bold rounded px-1 -mx-1 outline-none border-b-2 w-full text-primary border-b-accent bg-transparent"
               />
             ) : (
               <button
-                onClick={() => { setIsEditingName(true); setEditName(listing.name); }}
+                onClick={() => {
+                  setIsEditingName(true);
+                  setEditName(listing.name);
+                }}
                 className="text-base font-bold text-left hover:underline decoration-dashed truncate block w-full text-primary"
                 title="Click to rename"
               >
@@ -177,33 +228,40 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
             <div className="flex flex-wrap items-center gap-x-1.5 mt-0.5 text-sm text-secondary">
               {/* Address */}
               {listing.address && /\d/.test(listing.address) ? (
-                <span className="truncate max-w-[200px]">{listing.address}</span>
+                <span className="truncate max-w-[200px]">
+                  {listing.address}
+                </span>
               ) : isEditingAddress ? (
                 <input
                   ref={addressInputRef}
                   value={editAddress}
-                  onChange={e => setEditAddress(e.target.value)}
+                  onChange={(e) => setEditAddress(e.target.value)}
                   onBlur={commitAddressEdit}
                   onKeyDown={handleAddressKeyDown}
                   placeholder="Address"
-                  className="rounded px-1 -mx-1 outline-none border-b text-secondary"
-                  style={{ borderBottomColor: '#2A7F7F', backgroundColor: 'transparent', minWidth: '120px' }}
+                  className="rounded px-1 -mx-1 outline-none border-b text-secondary border-b-accent bg-transparent"
+                  style={{ minWidth: "120px" }}
                 />
               ) : (
                 <button
-                  onClick={() => { setIsEditingAddress(true); setEditAddress(listing.address ?? ''); }}
-                  className="hover:underline decoration-dashed"
-                  style={{ color: listing.address ? '#6b7280' : '#d1d5db' }}
-                  title={listing.address ? 'Click to edit address' : 'Add address'}
+                  onClick={() => {
+                    setIsEditingAddress(true);
+                    setEditAddress(listing.address ?? "");
+                  }}
+                  className={`hover:underline decoration-dashed ${listing.address ? "text-secondary" : "text-faint"}`}
+                  title={
+                    listing.address ? "Click to edit address" : "Add address"
+                  }
                 >
-                  {listing.address || 'Add address'}
+                  {listing.address || "Add address"}
                 </button>
               )}
 
               {/* Separator */}
-              {(listing.address || isEditingAddress) && (listing.price || isEditingPrice) && (
-                <span aria-hidden="true">·</span>
-              )}
+              {(listing.address || isEditingAddress) &&
+                (listing.price || isEditingPrice) && (
+                  <span aria-hidden="true">·</span>
+                )}
 
               {/* Price */}
               {listing.price ? (
@@ -212,18 +270,20 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
                 <input
                   ref={priceInputRef}
                   value={editPrice}
-                  onChange={e => setEditPrice(e.target.value)}
+                  onChange={(e) => setEditPrice(e.target.value)}
                   onBlur={commitPriceEdit}
                   onKeyDown={handlePriceKeyDown}
                   placeholder="Price"
-                  className="rounded px-1 -mx-1 outline-none border-b text-secondary"
-                  style={{ borderBottomColor: '#2A7F7F', backgroundColor: 'transparent', minWidth: '80px' }}
+                  className="rounded px-1 -mx-1 outline-none border-b text-secondary border-b-accent bg-transparent"
+                  style={{ minWidth: "80px" }}
                 />
               ) : (
                 <button
-                  onClick={() => { setIsEditingPrice(true); setEditPrice(''); }}
-                  className="hover:underline decoration-dashed"
-                  style={{ color: '#d1d5db' }}
+                  onClick={() => {
+                    setIsEditingPrice(true);
+                    setEditPrice("");
+                  }}
+                  className="hover:underline decoration-dashed text-faint"
                   title="Add price"
                 >
                   Add price
@@ -245,16 +305,18 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
         </div>
 
         {/* Collapsed callouts: neighborhood note (always) + pet risk warning */}
-        {(neighborhoodNote || petPolicy === 'risk') && (
+        {(neighborhoodNote || petPolicy === "risk") && (
           <div className="flex flex-col gap-1.5 mb-3">
             {neighborhoodNote && (
               <div className="rounded-lg px-3 py-2 text-xs border-l-4 bg-callout-bg border-l-accent text-callout-text">
-                <span className="font-semibold">📍 </span>{neighborhoodNote}
+                <span className="font-semibold">📍 </span>
+                {neighborhoodNote}
               </div>
             )}
-            {petPolicy === 'risk' && (
-              <div className="rounded-lg px-3 py-2 text-xs border-l-4 bg-score-no-bg border-l-score-no" style={{ color: '#c62828' }}>
-                <span className="font-semibold">⚠️ Pet risk</span> — check policy before applying
+            {petPolicy === "risk" && (
+              <div className="rounded-lg px-3 py-2 text-xs border-l-4 bg-score-no-bg border-l-score-no text-error">
+                <span className="font-semibold">⚠️ Pet risk</span> — check
+                policy before applying
               </div>
             )}
           </div>
@@ -262,20 +324,17 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
 
         {/* Status pill group */}
         <div className="flex flex-wrap gap-1.5 mb-3">
-          {STATUSES.map(s => {
+          {STATUSES.map((s) => {
             const isActive = listing.status === s.value;
             return (
               <button
                 key={s.value}
                 onClick={() => handleStatusChange(s.value)}
-                className="px-3 py-1 rounded-full text-xs font-semibold transition-colors"
-                style={
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
                   isActive
-                    ? { ...STATUS_ACTIVE_STYLE[s.value], cursor: 'default' }
-                    : { backgroundColor: '#f9fafb', color: '#9ca3af', cursor: 'pointer' }
-                }
-                onMouseEnter={e => { if (!isActive) e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
-                onMouseLeave={e => { if (!isActive) e.currentTarget.style.backgroundColor = '#f9fafb'; }}
+                    ? `${STATUS_ACTIVE_CLASS[s.value]} cursor-default`
+                    : "bg-gray-50 text-tertiary cursor-pointer hover:bg-inactive"
+                }`}
               >
                 {s.label}
               </button>
@@ -287,23 +346,22 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setIsExpanded(v => !v)}
+              onClick={() => setIsExpanded((v) => !v)}
               className="text-sm font-medium text-accent"
             >
-              {isExpanded ? 'Hide details ↑' : 'View details ↓'}
+              {isExpanded ? "Hide details ↑" : "View details ↓"}
             </button>
 
             {onAddToCompare && (
               <button
                 onClick={() => onAddToCompare(listing)}
-                className="text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors"
-                style={
+                className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors ${
                   inCompareQueue
-                    ? { color: '#ffffff', borderColor: '#1a1a2e', backgroundColor: '#1a1a2e' }
-                    : { color: '#6b7280', borderColor: '#e8e8e8', backgroundColor: '#ffffff' }
-                }
+                    ? "text-white border-primary bg-primary"
+                    : "text-secondary border-border bg-white"
+                }`}
               >
-                {inCompareQueue ? '✓ Added' : '+ Compare'}
+                {inCompareQueue ? "✓ Added" : "Compare"}
               </button>
             )}
           </div>
@@ -311,7 +369,9 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
           {/* Delete with confirmation */}
           {showDeleteConfirm ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-secondary">Delete this listing?</span>
+              <span className="text-xs text-secondary">
+                Delete this listing?
+              </span>
               <button
                 onClick={() => onDelete(listing.id)}
                 className="text-xs font-semibold px-2.5 py-1 rounded bg-score-no-bg text-score-no"
@@ -344,12 +404,16 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
             <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-tertiary">
               Scorecard
             </p>
-            <ScoreCard scores={listing.scores} criteria={criteria} onScoreChange={handleScoreChange} />
+            <ScoreCard
+              scores={listing.scores}
+              criteria={criteria}
+              onScoreChange={handleScoreChange}
+            />
           </div>
 
           {/* Neighborhood note */}
           {neighborhoodNote && (
-            <Callout bg="#e0f2f1" border="#2A7F7F" color="#00695c">
+            <Callout className="bg-callout-bg border-l-accent text-callout-text">
               <span className="font-semibold">📍 Location: </span>
               {neighborhoodNote}
             </Callout>
@@ -357,7 +421,7 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
 
           {/* Ceiling height */}
           {ceilingQuote && (
-            <Callout bg="#e8f5e9" border="#43a047" color="#2e7d32">
+            <Callout className="bg-score-yes-bg border-l-score-yes text-callout-yes-text">
               <span className="font-semibold">⬆️ Ceiling: </span>
               &ldquo;{ceilingQuote}&rdquo;
             </Callout>
@@ -365,8 +429,10 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
 
           {/* Pet policy */}
           {petStyle && (
-            <Callout bg={petStyle.bg} border={petStyle.border} color={petStyle.color}>
-              <span className="font-semibold">{petStyle.icon} {petStyle.label}</span>
+            <Callout className={petStyle.className}>
+              <span className="font-semibold">
+                {petStyle.icon} {petStyle.label}
+              </span>
             </Callout>
           )}
 
@@ -377,12 +443,11 @@ export default function ListingCard({ listing, criteria, onUpdate, onDelete, onU
             </label>
             <textarea
               value={localNotes}
-              onChange={e => setLocalNotes(e.target.value)}
+              onChange={(e) => setLocalNotes(e.target.value)}
               onBlur={handleNotesBlur}
               placeholder="Add your own notes about this listing…"
               rows={3}
-              className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-none border-border text-primary"
-              onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
+              className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-none border-border text-primary focus:border-accent"
             />
           </div>
 

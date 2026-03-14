@@ -99,14 +99,11 @@ function PillGroup({ options, value, onChange, getLabel }) {
           <button
             key={v}
             onClick={() => onChange(v)}
-            className="px-3 py-1 rounded-full text-xs font-semibold transition-colors"
-            style={
+            className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
               isActive
-                ? { backgroundColor: '#1a1a2e', color: '#ffffff', cursor: 'default' }
-                : { backgroundColor: '#f3f4f6', color: '#6b7280', cursor: 'pointer' }
-            }
-            onMouseEnter={e => { if (!isActive) e.currentTarget.style.backgroundColor = '#e5e7eb'; }}
-            onMouseLeave={e => { if (!isActive) e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
+                ? 'bg-primary text-white cursor-default'
+                : 'bg-inactive text-secondary cursor-pointer hover:bg-gray-200'
+            }`}
           >
             {label}
           </button>
@@ -131,15 +128,11 @@ function SummaryBar({ listings, statusFilter, onSetFilter }) {
       <button
         key={status}
         onClick={() => onSetFilter('statusFilter', isActive ? 'all' : status)}
-        className="text-sm transition-colors"
-        style={{
-          color: isActive ? '#2A7F7F' : '#6b7280',
-          fontWeight: isActive ? '600' : '400',
-          textDecoration: isActive ? 'underline' : 'none',
-          cursor: 'pointer',
-        }}
-        onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = '#1a1a2e'; }}
-        onMouseLeave={e => { e.currentTarget.style.color = isActive ? '#2A7F7F' : '#6b7280'; }}
+        className={`text-sm transition-colors cursor-pointer ${
+          isActive
+            ? 'text-accent font-semibold underline'
+            : 'text-secondary font-normal hover:text-primary'
+        }`}
         title={isActive ? `Clear ${STATUS_LABELS[status] ?? status} filter` : `Filter by ${STATUS_LABELS[status] ?? status}`}
       >
         {n} {STATUS_LABELS[status] ?? status}
@@ -158,7 +151,7 @@ function SummaryBar({ listings, statusFilter, onSetFilter }) {
           <span className="flex flex-wrap gap-x-3 text-sm">
             {parts.reduce((acc, el, i) => [
               ...acc,
-              i > 0 && <span key={`sep-${i}`} style={{ color: '#d1d5db' }}>·</span>,
+              i > 0 && <span key={`sep-${i}`} className="text-faint">·</span>,
               el,
             ], [])}
           </span>
@@ -236,9 +229,7 @@ function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, s
             onChange={e => setFilter('maxRent', e.target.value)}
             placeholder="e.g. 2000"
             min={0}
-            className="w-full rounded-lg border px-3 py-1.5 text-sm outline-none border-border text-primary bg-white"
-            onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
-            onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
+            className="w-full rounded-lg border px-3 py-1.5 text-sm outline-none border-border text-primary bg-white focus:border-accent"
           />
         </div>
         <div className="flex-1">
@@ -248,9 +239,7 @@ function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, s
             value={neighborhoodSearch}
             onChange={e => setFilter('neighborhoodSearch', e.target.value)}
             placeholder="e.g. Capitol Hill"
-            className="w-full rounded-lg border px-3 py-1.5 text-sm outline-none border-border text-primary bg-white"
-            onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
-            onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
+            className="w-full rounded-lg border px-3 py-1.5 text-sm outline-none border-border text-primary bg-white focus:border-accent"
           />
         </div>
       </div>
@@ -266,14 +255,11 @@ function FilterPanel({ filters, setFilter, resetAllFilters, activeFilterCount, s
                 <button
                   key={c.key}
                   onClick={() => toggleMustBeYes(c.key)}
-                  className="px-3 py-1 rounded-full text-xs font-semibold border transition-colors"
-                  style={
+                  className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors cursor-pointer ${
                     isActive
-                      ? { backgroundColor: '#2A7F7F', color: '#ffffff', borderColor: '#2A7F7F', cursor: 'pointer' }
-                      : { backgroundColor: '#f3f4f6', color: '#6b7280', borderColor: 'transparent', cursor: 'pointer' }
-                  }
-                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.backgroundColor = '#e5e7eb'; }}
-                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
+                      ? 'bg-accent text-white border-accent'
+                      : 'bg-inactive text-secondary border-transparent hover:bg-gray-200'
+                  }`}
                 >
                   {isActive ? '✓ ' : ''}{c.label}
                 </button>
@@ -409,9 +395,7 @@ export default function SavedTab({
           value={filters.search}
           onChange={e => onSetFilter('search', e.target.value)}
           placeholder="Search by name or address…"
-          className="flex-1 rounded-lg border px-3 py-2 text-sm outline-none border-border text-primary bg-white"
-          onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
-          onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
+          className="flex-1 rounded-lg border px-3 py-2 text-sm outline-none border-border text-primary bg-white focus:border-accent"
         />
         <select
           value={filters.sortBy}
@@ -424,9 +408,7 @@ export default function SavedTab({
         </select>
         <button
           onClick={() => setExportOpen(true)}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-semibold transition-colors border-border text-secondary bg-white shrink-0"
-          onMouseEnter={e => { e.currentTarget.style.borderColor = '#2A7F7F'; e.currentTarget.style.color = '#2A7F7F'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = '#e8e8e8'; e.currentTarget.style.color = '#6b7280'; }}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-semibold transition-colors border-border text-secondary bg-white shrink-0 hover:border-accent hover:text-accent"
           title="Export listings to CSV"
         >
           <Download size={15} />
@@ -476,9 +458,7 @@ export default function SavedTab({
           <p className="text-sm text-tertiary">No listings match your filters.</p>
           <button
             onClick={onResetFilters}
-            className="text-sm font-semibold px-4 py-1.5 rounded-lg border transition-colors border-border text-secondary"
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+            className="text-sm font-semibold px-4 py-1.5 rounded-lg border transition-colors border-border text-secondary hover:bg-inactive"
           >
             Clear filters
           </button>
@@ -546,12 +526,11 @@ export default function SavedTab({
             <button
               onClick={handleCompareSelected}
               disabled={compareCount < 2 || compareCount > 4}
-              className="text-sm font-bold px-5 py-2 rounded-lg transition-colors"
-              style={
+              className={`text-sm font-bold px-5 py-2 rounded-lg transition-colors ${
                 compareCount >= 2 && compareCount <= 4
-                  ? { backgroundColor: '#2A7F7F', color: '#ffffff', cursor: 'pointer' }
-                  : { backgroundColor: '#374151', color: '#9ca3af', cursor: 'default' }
-              }
+                  ? 'bg-accent text-white cursor-pointer'
+                  : 'bg-prose text-tertiary cursor-default'
+              }`}
             >
               Compare {compareCount} →
             </button>
