@@ -53,8 +53,13 @@ function todayString() {
 /**
  * Build and trigger a CSV download.
  *
- * Column order: Name, URL, Price, Address, Weighted Score, Verdict, Status,
- * then one column per selected criterion (or two for scored criteria in 'both' mode).
+ * Column order: Name, URL, Price, Price (Sortable), Address, Weighted Score,
+ * Verdict, Status, then one column per selected criterion (or two for scored
+ * criteria in 'both' mode).
+ *
+ * Price columns:
+ *   "Price"           — price_display string (e.g. "$1,530–$2,706"), falls back to price
+ *   "Price (Sortable)" — price_min integer (e.g. 1530), empty if null
  *
  * @param {object[]} listings          - Listing objects to export
  * @param {object[]} criteria          - Criteria to include as columns
@@ -65,7 +70,7 @@ export function exportToCSV(listings, criteria, options = {}) {
   const { scoreFormat = 'scores' } = options;
 
   // ── Header row ────────────────────────────────────────────────────────────
-  const fixedHeaders = ['Name', 'URL', 'Price', 'Address', 'Weighted Score', 'Verdict', 'Status'];
+  const fixedHeaders = ['Name', 'URL', 'Price', 'Price (Sortable)', 'Address', 'Weighted Score', 'Verdict', 'Status'];
 
   const criteriaHeaders = [];
   for (const c of criteria) {
@@ -83,10 +88,16 @@ export function exportToCSV(listings, criteria, options = {}) {
 
   // ── Data rows ─────────────────────────────────────────────────────────────
   const rows = listings.map(listing => {
+    // Price: prefer price_display (new field), fall back to legacy price string
+    const priceDisplay = listing.price_display ?? listing.price ?? null;
+    // price_min: sortable integer, empty cell if null
+    const priceMin = typeof listing.price_min === 'number' ? listing.price_min : null;
+
     const fixed = [
       listing.name ?? '',
       listing.url ?? '',
-      listing.price ?? '',
+      priceDisplay ?? '',
+      priceMin ?? '',
       listing.address ?? '',
       listing.weighted_score ?? '',
       listing.verdict ?? '',

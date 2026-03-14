@@ -36,8 +36,8 @@ export const DEFAULT_CRITERIA = [
     flagOnly: false,
   },
   {
-    key: 'parking',
-    label: 'Parking included',
+    key: 'parking_details',
+    label: 'Parking',
     isDisqualifier: false,
     flagOnly: false,
   },
@@ -56,14 +56,14 @@ export const DEFAULT_CRITERIA = [
 
   // --- Flag-only criteria (always surfaced, never scored) ---
   {
-    key: 'ceiling_height',
-    label: 'Ceiling height',
+    key: 'location_context',
+    label: 'Location & transit',
     isDisqualifier: false,
     flagOnly: true,
   },
   {
-    key: 'neighborhood_note',
-    label: 'Neighborhood note',
+    key: 'interior_features',
+    label: 'Interior features',
     isDisqualifier: false,
     flagOnly: true,
   },
@@ -75,22 +75,26 @@ export const DEFAULT_CRITERIA = [
  *
  * The `green_lake` key is intentionally omitted here — its description
  * is generated dynamically from the user's saved location setting.
+ *
+ * Legacy keys (prefixed with a comment) are kept as aliases so that
+ * saved listings with old scores continue to display correctly.
  */
 export const CRITERION_DESCRIPTIONS = {
   // ── Default criteria ─────────────────────────────────────────
   washer_dryer:      'In-unit washer/dryer present',
   price:             'Total rent under $2,000/month',
-  parking:           'Street or assigned parking available for a car',
   cosigner:          'Likely to accept co-signer. Individual/private landlords = yes. Large property management companies = unclear unless stated.',
   month_to_month:    'Month-to-month or short/flexible lease available',
-  cats_allowed:      'Cats are allowed. Check pet policy section.',
-  ceiling_height:    'Any mention of ceiling height, loft, top floor, high ceilings, vaulted. Extract the exact phrase or null.',
-  neighborhood_note: 'Brief note on neighborhood location relative to the target area. One sentence max.',
+
+  // ── Merged master criteria ────────────────────────────────────
+  parking_details:   'Any parking available — street, assigned, garage, or covered. Note type and whether included or extra cost.',
+  pet_policy:        'Pet policy — cats and/or dogs allowed. Note any restrictions or fees.',
+  location_context:  'Location summary — neighborhood walkability, nearby transit (bus/light rail), and proximity to the target area.',
+  interior_features: 'Notable interior details — ceiling height, natural light, flooring type (hardwood/LVP/carpet), or any standout finishes.',
 
   // ── Appliances ───────────────────────────────────────────────
   dishwasher:        'Dishwasher present in unit',
   central_ac:        'Central air conditioning or in-unit AC (not just a window unit)',
-  hardwood_floors:   'Hardwood, LVP, or non-carpet flooring throughout main living areas',
 
   // ── Outdoor ──────────────────────────────────────────────────
   balcony:           'Private balcony, patio, deck, or any outdoor space included with unit',
@@ -102,16 +106,10 @@ export const CRITERION_DESCRIPTIONS = {
   secure_entry:      'Secure building entry — key fob, intercom system, or doorman',
   no_basement:       'Unit is above ground (not a basement or garden-level unit)',
   package_receiving: 'Package locker, mailroom, or secure package receiving available',
-  concierge:         'On-site concierge or building manager',
+  new_construction:  'Building or unit is new construction or recently renovated (within ~5 years)',
 
-  // ── Parking & Transit ────────────────────────────────────────
-  garage_parking:    'Covered or garage parking available (included or available to rent)',
+  // ── Location ─────────────────────────────────────────────────
   bike_storage:      'Secure indoor bike storage or bike room available',
-  near_transit:      'Within comfortable walking distance of a bus line or light rail station',
-  walkable:          'Neighborhood is walkable — amenities, groceries, cafes nearby on foot',
-
-  // ── Pets ─────────────────────────────────────────────────────
-  dog_friendly:      'Dogs allowed — any size, or confirm if restrictions apply',
 
   // ── Utilities & Lease ────────────────────────────────────────
   utilities_included: 'Water, electricity, or gas included in rent (partially or fully)',
@@ -119,18 +117,36 @@ export const CRITERION_DESCRIPTIONS = {
   no_credit_check:    'No credit check required, or flexible/alternative rental qualification accepted',
 
   // ── Space & Feel ─────────────────────────────────────────────
-  natural_light:     'Unit has good natural light — south or west-facing windows, or described as bright/sunny',
   quiet_building:    'Building or street described as quiet, residential, or away from busy roads',
   storage_unit:      'Additional storage unit, cage, or large closets included or available',
   home_office:       'Space suitable for a home office — den, second bedroom, alcove, or extra room mentioned',
+
+  // ── Legacy aliases (kept so old saved listings render correctly) ──────────
+  cats_allowed:      'Cats are allowed. Check pet policy section.',
+  ceiling_height:    'Any mention of ceiling height, loft, top floor, high ceilings, vaulted. Extract the exact phrase or null.',
+  neighborhood_note: 'Brief note on neighborhood location relative to the target area. One sentence max.',
+  garage_parking:    'Covered or garage parking available (included or available to rent)',
+  parking:           'Street or assigned parking available for a car',
+  near_transit:      'Within comfortable walking distance of a bus line or light rail station',
+  walkable:          'Neighborhood is walkable — amenities, groceries, cafes nearby on foot',
+  dog_friendly:      'Dogs allowed — any size, or confirm if restrictions apply',
+  hardwood_floors:   'Hardwood, LVP, or non-carpet flooring throughout main living areas',
+  natural_light:     'Unit has good natural light — south or west-facing windows, or described as bright/sunny',
   high_ceilings:     'Ceilings described as high, vaulted, or over 9 feet',
-  new_construction:  'Building or unit is new construction or recently renovated (within ~5 years)',
+  concierge:         'On-site concierge or building manager',
 };
 
 /**
  * Criteria library — grouped for the Settings picker.
  * Keys must exist in CRITERION_DESCRIPTIONS above.
  * The `green_lake` location criterion is excluded — it's managed via the location setting.
+ *
+ * Consolidated from ~30 items to ~20 master criteria via 4 merges:
+ *   parking + garage_parking            → parking_details
+ *   cats_allowed + dog_friendly         → pet_policy
+ *   walkable + near_transit             → location_context  (+ neighborhood_note from DEFAULT)
+ *   ceiling_height + natural_light +
+ *     hardwood_floors + high_ceilings   → interior_features
  */
 export const CRITERIA_LIBRARY = [
   {
@@ -138,7 +154,7 @@ export const CRITERIA_LIBRARY = [
     items: [
       { key: 'washer_dryer',   label: 'In-unit W/D' },
       { key: 'price',          label: 'Price ≤ $2,000' },
-      { key: 'parking',        label: 'Parking included' },
+      { key: 'parking_details', label: 'Parking' },
       { key: 'cosigner',       label: 'Co-signer friendly' },
       { key: 'month_to_month', label: 'Month-to-month lease' },
     ],
@@ -146,9 +162,8 @@ export const CRITERIA_LIBRARY = [
   {
     category: 'Appliances',
     items: [
-      { key: 'dishwasher',      label: 'Dishwasher' },
-      { key: 'central_ac',      label: 'Central A/C' },
-      { key: 'hardwood_floors', label: 'Hardwood / LVP floors' },
+      { key: 'dishwasher',  label: 'Dishwasher' },
+      { key: 'central_ac',  label: 'Central A/C' },
     ],
   },
   {
@@ -166,25 +181,22 @@ export const CRITERIA_LIBRARY = [
       { key: 'secure_entry',      label: 'Secure entry' },
       { key: 'no_basement',       label: 'Not a basement unit' },
       { key: 'package_receiving', label: 'Package receiving' },
-      { key: 'concierge',         label: 'Concierge / on-site manager' },
       { key: 'new_construction',  label: 'New / recently renovated' },
-      { key: 'high_ceilings',     label: 'High ceilings' },
     ],
   },
   {
-    category: 'Parking & Transit',
+    category: 'Space & Feel',
     items: [
-      { key: 'garage_parking', label: 'Garage parking' },
-      { key: 'bike_storage',   label: 'Bike storage' },
-      { key: 'near_transit',   label: 'Near bus / light rail' },
-      { key: 'walkable',       label: 'Walkable neighborhood' },
+      { key: 'interior_features', label: 'Interior features' },
+      { key: 'quiet_building',    label: 'Quiet building' },
+      { key: 'storage_unit',      label: 'Storage unit' },
+      { key: 'home_office',       label: 'Home office space' },
     ],
   },
   {
     category: 'Pets',
     items: [
-      { key: 'cats_allowed', label: 'Cats allowed' },
-      { key: 'dog_friendly', label: 'Dog-friendly' },
+      { key: 'pet_policy', label: 'Pet policy' },
     ],
   },
   {
@@ -196,12 +208,10 @@ export const CRITERIA_LIBRARY = [
     ],
   },
   {
-    category: 'Space & Feel',
+    category: 'Location',
     items: [
-      { key: 'natural_light', label: 'Natural light' },
-      { key: 'quiet_building', label: 'Quiet building' },
-      { key: 'storage_unit',  label: 'Storage unit' },
-      { key: 'home_office',   label: 'Home office space' },
+      { key: 'location_context', label: 'Location & transit' },
+      { key: 'bike_storage',     label: 'Bike storage' },
     ],
   },
 ];

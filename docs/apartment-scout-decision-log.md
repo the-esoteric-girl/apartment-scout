@@ -104,3 +104,23 @@ Browser → /api/analyze (Vercel function) → Anthropic API
 **Tradeoff:** The red-on-hover removal affordance is only discoverable by hovering. A persistent remove icon on each added pill would be more explicit but clutters the pill at small text sizes.
 
 ---
+
+### D9 — Compact API Response Format (Y/N/U + short keys)
+
+**Decision:** Claude now returns scores in a compact `{"s":"Y|N|U","r":"≤10 words"}` format instead of flat `"yes"|"no"|"unclear"` strings, and price is split into `price_display` (string) and `price_min` (integer).
+
+**Why:** The previous format was verbose — full `yes/no/unclear` strings, 15-word note caps, and a large inactive-library schema inflated every API response. The compact format reduces output tokens significantly without losing any data. A `normalizeCompactResult` function inside `analyzeListing` translates the compact shape back into the flat shape the rest of the app expects, so no consumer needed to change.
+
+**Tradeoff:** Adds a normalization layer between the API and the UI. If Claude ever returns malformed compact keys (e.g. `"s":"Yes"` instead of `"s":"Y"`), the normalizer falls back to `"unclear"` rather than crashing.
+
+---
+
+### D10 — Criteria Library Consolidation (31 → 25 master criteria)
+
+**Decision:** Merged four groups of overlapping criteria into single keys: `parking_details` (was parking + garage_parking), `pet_policy` (was cats_allowed + dog_friendly), `location_context` (was walkable + near_transit + neighborhood_note), `interior_features` (was ceiling_height + natural_light + hardwood_floors + high_ceilings).
+
+**Why:** The original library had redundant entries that asked Claude to evaluate the same signals twice (e.g. cats_allowed and dog_friendly as separate scored criteria). Merging them into one key per topic reduces the scores object size in the API response, simplifies the Settings picker, and makes the system prompt shorter.
+
+**Tradeoff:** Saved listings that stored scores under the old keys (e.g. `cats_allowed`) will show "unclear" for the new merged key (`pet_policy`) until re-analyzed. The legacy keys are kept as aliases in `CRITERION_DESCRIPTIONS` so stored values still render correctly in the export and anywhere the label is looked up by key.
+
+---

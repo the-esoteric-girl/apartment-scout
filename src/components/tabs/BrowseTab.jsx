@@ -22,12 +22,9 @@ import VerdictBadge from '../VerdictBadge';
 // Sub-components
 // ─────────────────────────────────────────────────────────────
 
-function Callout({ bg, border, color, children }) {
+function Callout({ className, children }) {
   return (
-    <div
-      className="rounded-lg px-4 py-3 text-sm border-l-4"
-      style={{ backgroundColor: bg, borderLeftColor: border, color }}
-    >
+    <div className={`rounded-lg px-4 py-3 text-sm border-l-4 ${className}`}>
       {children}
     </div>
   );
@@ -56,8 +53,8 @@ function Spinner() {
 }
 
 function ResultSection({ result, criteria, isSaved, onSave }) {
-  const ceilingQuote = result.scores?.ceiling_height;
-  const neighborhoodNote = result.scores?.neighborhood_note;
+  const interiorNote = result.scores?.interior_features;
+  const locationNote = result.scores?.location_context;
 
   return (
     <div className="rounded-xl border overflow-hidden bg-white border-border">
@@ -89,11 +86,11 @@ function ResultSection({ result, criteria, isSaved, onSave }) {
       {/* ── Body ── */}
       <div className="px-6 py-5 flex flex-col gap-4">
 
-        {/* Neighborhood note */}
-        {neighborhoodNote && (
-          <Callout bg="#e0f2f1" border="#2A7F7F" color="#00695c">
+        {/* Location & transit note */}
+        {locationNote && (
+          <Callout className="bg-callout-bg border-l-accent text-callout-text">
             <span className="font-semibold">📍 Location: </span>
-            {neighborhoodNote}
+            {locationNote}
           </Callout>
         )}
 
@@ -105,17 +102,17 @@ function ResultSection({ result, criteria, isSaved, onSave }) {
           <ScoreCard scores={result.scores} criteria={criteria} />
         </div>
 
-        {/* Ceiling height */}
-        {ceilingQuote && (
-          <Callout bg="#e8f5e9" border="#43a047" color="#2e7d32">
-            <span className="font-semibold">⬆️ Ceiling: </span>
-            &ldquo;{ceilingQuote}&rdquo;
+        {/* Interior features note */}
+        {interiorNote && (
+          <Callout className="bg-score-yes-bg border-l-score-yes text-callout-yes-text">
+            <span className="font-semibold">✦ Interior: </span>
+            &ldquo;{interiorNote}&rdquo;
           </Callout>
         )}
 
         {/* Key concern */}
         {result.key_concern && (
-          <Callout bg="#fff8e1" border="#ffb300" color="#e65100">
+          <Callout className="bg-score-unclear-bg border-l-warning text-score-unclear">
             <span className="font-semibold">⚠ Key concern: </span>
             {result.key_concern}
           </Callout>
@@ -169,7 +166,7 @@ export default function BrowseTab({ criteria, listings, location, onSave, browse
     try {
       const system = buildSystemPrompt(criteria, location);
       const userPrompt = buildBrowsePrompt(listingText, urlOrLabel);
-      const data = await analyzeListing({ system, userPrompt });
+      const data = await analyzeListing({ system, userPrompt, criteria });
       onBrowseStateChange({ result: data });
     } catch (err) {
       onBrowseStateChange({ error: err.message });
@@ -187,6 +184,8 @@ export default function BrowseTab({ criteria, listings, location, onSave, browse
       name: result.name || 'Unnamed listing',
       address: result.address || '',
       price: result.price || '',
+      price_display: result.price_display ?? null,
+      price_min: result.price_min ?? null,
       bedrooms: result.bedrooms ?? null,
       neighborhood: result.neighborhood ?? null,
       url: urlOrLabel.trim() || null,
@@ -219,9 +218,7 @@ export default function BrowseTab({ criteria, listings, location, onSave, browse
             value={urlOrLabel}
             onChange={e => onBrowseStateChange({ urlOrLabel: e.target.value })}
             placeholder="Zillow URL or nickname"
-            className="w-full rounded-lg border px-3 py-2 text-sm outline-none border-border text-primary"
-            onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
-            onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
+            className="w-full rounded-lg border px-3 py-2 text-sm outline-none border-border text-primary focus:border-accent"
           />
         </div>
 
@@ -235,10 +232,8 @@ export default function BrowseTab({ criteria, listings, location, onSave, browse
             onChange={e => onBrowseStateChange({ listingText: e.target.value })}
             placeholder="Paste the full listing text here — description, amenities, price, location..."
             rows={6}
-            className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-y border-border text-primary"
+            className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-y border-border text-primary focus:border-accent"
             style={{ minHeight: '120px' }}
-            onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
-            onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
           />
         </div>
 
@@ -280,13 +275,12 @@ export default function BrowseTab({ criteria, listings, location, onSave, browse
         <div className="rounded-xl px-4 py-3 mb-6 flex items-start gap-3 border-l-4 bg-score-no-bg border-l-score-no">
           <span className="text-lg leading-none mt-0.5" aria-hidden="true">⚠</span>
           <div>
-            <p className="text-sm font-medium" style={{ color: '#c62828' }}>
+            <p className="text-sm font-medium text-error">
               {error}
             </p>
             <button
               onClick={handleAnalyze}
-              className="text-sm font-semibold mt-1 underline"
-              style={{ color: '#c62828' }}
+              className="text-sm font-semibold mt-1 underline text-error"
             >
               Try again
             </button>

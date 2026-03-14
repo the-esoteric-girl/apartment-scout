@@ -31,7 +31,7 @@ import VerdictBadge from '../VerdictBadge';
 
 const DT_LABEL_W = 160;
 const DT_COL_W   = 180;
-const DT_CELL_BORDER = { borderBottom: '1px solid #f3f4f6' };
+const DT_CELL_BORDER = { borderBottom: '1px solid var(--color-inactive)' };
 
 function dtStickyLabel(bg) {
   return {
@@ -57,10 +57,10 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
 
   function SummaryRow({ rowKey, label, renderCell }) {
     return (
-      <tr key={rowKey} style={{ backgroundColor: '#fafafa' }}>
+      <tr key={rowKey} style={{ backgroundColor: 'var(--color-row-alt)' }}>
         <td
           className="px-4 py-3 text-xs font-semibold uppercase tracking-wide"
-          style={dtStickyLabel('#fafafa')}
+          style={dtStickyLabel('var(--color-row-alt)')}
         >
           <span className="text-tertiary">{label}</span>
         </td>
@@ -76,9 +76,9 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
           colSpan={colCount}
           className="px-4 py-1 text-xs font-semibold uppercase tracking-wide text-tertiary"
           style={{
-            backgroundColor: '#f3f4f6',
-            borderTop: '1px solid #e8e8e8',
-            borderBottom: '1px solid #e8e8e8',
+            backgroundColor: 'var(--color-inactive)',
+            borderTop: '1px solid var(--color-border)',
+            borderBottom: '1px solid var(--color-border)',
           }}
         >
           {label}
@@ -98,8 +98,8 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
           className="px-3 py-3 text-center"
           style={{
             minWidth: DT_COL_W,
-            borderLeft: '1px solid #f3f4f6',
-            backgroundColor: i === winnerIndex ? '#f0fafa' : 'transparent',
+            borderLeft: '1px solid var(--color-inactive)',
+            backgroundColor: i === winnerIndex ? 'var(--color-accent-subtle)' : 'transparent',
             ...DT_CELL_BORDER,
           }}
         >
@@ -120,8 +120,8 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
           className="px-3 py-3 text-center"
           style={{
             minWidth: DT_COL_W,
-            borderLeft: '1px solid #f3f4f6',
-            backgroundColor: i === winnerIndex ? '#f0fafa' : 'transparent',
+            borderLeft: '1px solid var(--color-inactive)',
+            backgroundColor: i === winnerIndex ? 'var(--color-accent-subtle)' : 'transparent',
             ...DT_CELL_BORDER,
           }}
         >
@@ -141,7 +141,7 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
 
           {/* ── THEAD ── */}
           <thead>
-            <tr style={{ borderBottom: '2px solid #e8e8e8' }}>
+            <tr style={{ borderBottom: '2px solid var(--color-border)' }}>
               {/* Corner */}
               <th
                 className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-tertiary"
@@ -149,11 +149,11 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                   position: 'sticky',
                   top: 0,
                   left: 0,
-                  backgroundColor: '#ffffff',
+                  backgroundColor: 'white',
                   width: DT_LABEL_W,
                   minWidth: DT_LABEL_W,
                   zIndex: 3,
-                  borderBottom: '2px solid #e8e8e8',
+                  borderBottom: '2px solid var(--color-border)',
                 }}
               >
                 Criterion
@@ -170,9 +170,9 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                       position: 'sticky',
                       top: 0,
                       minWidth: DT_COL_W,
-                      backgroundColor: isWinner ? '#e0f2f1' : '#ffffff',
-                      borderLeft: '1px solid #f3f4f6',
-                      borderBottom: '2px solid #e8e8e8',
+                      backgroundColor: isWinner ? 'var(--color-callout-bg)' : 'white',
+                      borderLeft: '1px solid var(--color-inactive)',
+                      borderBottom: '2px solid var(--color-border)',
                       verticalAlign: 'top',
                       zIndex: 2,
                     }}
@@ -220,7 +220,7 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                   const anyDQ =
                     criterion.isDisqualifier &&
                     listings.some(l => (l.scores?.[criterion.key] ?? 'unclear') === 'no');
-                  const rowBg = anyDQ ? '#fff5f5' : (index % 2 === 0 ? '#ffffff' : '#fafafa');
+                  const rowBg = anyDQ ? 'var(--color-row-dq)' : (index % 2 === 0 ? 'white' : 'var(--color-row-alt)');
 
                   return (
                     <tr key={criterion.key} style={{ backgroundColor: rowBg }}>
@@ -254,8 +254,8 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                             className="px-3 py-2.5 text-center align-middle"
                             style={{
                               minWidth: DT_COL_W,
-                              borderLeft: '1px solid #f3f4f6',
-                              backgroundColor: i === winnerIndex ? '#f5fffe' : 'transparent',
+                              borderLeft: '1px solid var(--color-inactive)',
+                              backgroundColor: i === winnerIndex ? 'var(--color-winner-cell)' : 'transparent',
                               ...DT_CELL_BORDER,
                             }}
                           >
@@ -286,10 +286,10 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
               </tr>
             ) : (
               <>
-                <tr style={{ backgroundColor: '#ffffff' }}>
+                <tr style={{ backgroundColor: 'white' }}>
                   <td
                     className="px-4 py-2.5 align-top"
-                    style={dtStickyLabel('#ffffff')}
+                    style={dtStickyLabel('white')}
                   >
                     <span className="text-xs font-semibold uppercase tracking-wide pl-6 text-score-yes">
                       Strengths
@@ -299,12 +299,12 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                     <td
                       key={i}
                       className="px-3 py-2.5 align-top text-xs"
-                      style={{ minWidth: DT_COL_W, borderLeft: '1px solid #f3f4f6', backgroundColor: i === winnerIndex ? '#f5fffe' : 'transparent', ...DT_CELL_BORDER }}
+                      style={{ minWidth: DT_COL_W, borderLeft: '1px solid var(--color-inactive)', backgroundColor: i === winnerIndex ? 'var(--color-winner-cell)' : 'transparent', ...DT_CELL_BORDER }}
                     >
                       {l.strengths?.length ? (
                         <ul className="flex flex-col gap-0.5">
                           {l.strengths.map((s, j) => (
-                            <li key={j} className="flex gap-1 items-start" style={{ color: '#374151' }}>
+                            <li key={j} className="flex gap-1 items-start text-prose">
                               <span className="text-score-yes">✓</span> {s}
                             </li>
                           ))}
@@ -315,10 +315,10 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                     </td>
                   ))}
                 </tr>
-                <tr style={{ backgroundColor: '#fafafa' }}>
+                <tr style={{ backgroundColor: 'var(--color-row-alt)' }}>
                   <td
                     className="px-4 py-2.5 align-top"
-                    style={dtStickyLabel('#fafafa')}
+                    style={dtStickyLabel('var(--color-row-alt)')}
                   >
                     <span className="text-xs font-semibold uppercase tracking-wide pl-6 text-score-no">
                       Concerns
@@ -328,12 +328,12 @@ function DecisionTable({ results, criteria, winnerIndex, isAlreadySaved, savedIn
                     <td
                       key={i}
                       className="px-3 py-2.5 align-top text-xs"
-                      style={{ minWidth: DT_COL_W, borderLeft: '1px solid #f3f4f6', backgroundColor: i === winnerIndex ? '#f5fffe' : 'transparent', ...DT_CELL_BORDER }}
+                      style={{ minWidth: DT_COL_W, borderLeft: '1px solid var(--color-inactive)', backgroundColor: i === winnerIndex ? 'var(--color-winner-cell)' : 'transparent', ...DT_CELL_BORDER }}
                     >
                       {l.concerns?.length ? (
                         <ul className="flex flex-col gap-0.5">
                           {l.concerns.map((c, j) => (
-                            <li key={j} className="flex gap-1 items-start" style={{ color: '#374151' }}>
+                            <li key={j} className="flex gap-1 items-start text-prose">
                               <span className="text-score-no">✗</span> {c}
                             </li>
                           ))}
@@ -407,18 +407,16 @@ function SlotInput({ slot, index, totalSlots, savedListings, onChange, onRemove 
               <button
                 onClick={() => setMode('saved')}
                 className={`px-2.5 py-1 transition-colors ${
-                  slot.mode === 'saved' ? 'bg-primary text-white' : 'text-secondary'
+                  slot.mode === 'saved' ? 'bg-primary text-white' : 'bg-gray-50 text-secondary'
                 }`}
-                style={slot.mode !== 'saved' ? { backgroundColor: '#f9fafb' } : {}}
               >
                 From saved
               </button>
               <button
                 onClick={() => setMode('new')}
                 className={`px-2.5 py-1 transition-colors ${
-                  slot.mode === 'new' ? 'bg-primary text-white' : 'text-secondary'
+                  slot.mode === 'new' ? 'bg-primary text-white' : 'bg-gray-50 text-secondary'
                 }`}
-                style={slot.mode !== 'new' ? { backgroundColor: '#f9fafb' } : {}}
               >
                 Paste new
               </button>
@@ -447,8 +445,7 @@ function SlotInput({ slot, index, totalSlots, savedListings, onChange, onRemove 
               const found = savedListings.find(l => l.id === e.target.value) ?? null;
               onChange({ savedListing: found });
             }}
-            className="w-full rounded-lg border px-3 py-2 text-sm outline-none border-border bg-white cursor-pointer"
-            style={{ color: slot.savedListing ? '#1a1a2e' : '#9ca3af' }}
+            className={`w-full rounded-lg border px-3 py-2 text-sm outline-none border-border bg-white cursor-pointer ${slot.savedListing ? 'text-primary' : 'text-tertiary'}`}
           >
             <option value="">Select a saved listing…</option>
             {savedListings.map(l => (
@@ -461,8 +458,7 @@ function SlotInput({ slot, index, totalSlots, savedListings, onChange, onRemove 
           {/* Preview of selected saved listing */}
           {slot.savedListing && (
             <div
-              className="mt-3 rounded-lg px-3 py-2 text-sm flex items-center justify-between"
-              style={{ backgroundColor: '#f7f7f5' }}
+              className="mt-3 rounded-lg px-3 py-2 text-sm flex items-center justify-between bg-app-bg"
             >
               <div>
                 <span className="font-medium text-primary">{slot.savedListing.name}</span>
@@ -484,18 +480,14 @@ function SlotInput({ slot, index, totalSlots, savedListings, onChange, onRemove 
             value={slot.urlOrLabel}
             onChange={e => onChange({ urlOrLabel: e.target.value })}
             placeholder="Zillow URL or nickname (optional)"
-            className="w-full rounded-lg border px-3 py-2 text-sm outline-none border-border text-primary"
-            onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
-            onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
+            className="w-full rounded-lg border px-3 py-2 text-sm outline-none border-border text-primary focus:border-accent"
           />
           <textarea
             value={slot.text}
             onChange={e => onChange({ text: e.target.value })}
             placeholder="Paste the full listing text here…"
             rows={5}
-            className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-none border-border text-primary"
-            onFocus={e => (e.target.style.borderColor = '#2A7F7F')}
-            onBlur={e => (e.target.style.borderColor = '#e8e8e8')}
+            className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-none border-border text-primary focus:border-accent"
           />
         </div>
       )}
@@ -512,11 +504,9 @@ function ResultCard({ result, isWinner, criteria, alreadySaved, isSaved, onSave 
 
   return (
     <div
-      className="rounded-xl border flex flex-col overflow-hidden bg-white"
-      style={{
-        borderColor: isWinner ? '#2A7F7F' : '#e8e8e8',
-        borderWidth: isWinner ? '2px' : '1px',
-      }}
+      className={`rounded-xl flex flex-col overflow-hidden bg-white ${
+        isWinner ? 'border-2 border-accent' : 'border border-border'
+      }`}
     >
       {/* Winner badge */}
       {isWinner && (
@@ -558,7 +548,7 @@ function ResultCard({ result, isWinner, criteria, alreadySaved, isSaved, onSave 
             </p>
             <ul className="flex flex-col gap-1">
               {result.strengths.map((s, i) => (
-                <li key={i} className="text-sm flex gap-1.5 items-start" style={{ color: '#374151' }}>
+                <li key={i} className="text-sm flex gap-1.5 items-start text-prose">
                   <span className="text-score-yes">✓</span> {s}
                 </li>
               ))}
@@ -574,7 +564,7 @@ function ResultCard({ result, isWinner, criteria, alreadySaved, isSaved, onSave 
             </p>
             <ul className="flex flex-col gap-1">
               {result.concerns.map((c, i) => (
-                <li key={i} className="text-sm flex gap-1.5 items-start" style={{ color: '#374151' }}>
+                <li key={i} className="text-sm flex gap-1.5 items-start text-prose">
                   <span className="text-score-no">✗</span> {c}
                 </li>
               ))}
@@ -591,7 +581,7 @@ function ResultCard({ result, isWinner, criteria, alreadySaved, isSaved, onSave 
 
         {/* Ceiling height */}
         {ceilingQuote && (
-          <div className="rounded-lg px-3 py-2 text-xs border-l-4 bg-score-yes-bg border-l-score-yes" style={{ color: '#2e7d32' }}>
+          <div className="rounded-lg px-3 py-2 text-xs border-l-4 bg-score-yes-bg border-l-score-yes text-callout-yes-text">
             <span className="font-semibold">⬆️ </span>&ldquo;{ceilingQuote}&rdquo;
           </div>
         )}
@@ -745,7 +735,7 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
 
       const system = buildSystemPrompt(criteria, location);
       const userPrompt = buildDecisionPrompt(promptSlots);
-      const data = await analyzeListing({ system, userPrompt });
+      const data = await analyzeListing({ system, userPrompt, criteria });
       setResults(data);
     } catch (err) {
       setError(err.message);
@@ -762,6 +752,8 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
       name: resultListing.name || 'Unnamed listing',
       address: resultListing.address || '',
       price: resultListing.price || '',
+      price_display: resultListing.price_display ?? null,
+      price_min: resultListing.price_min ?? null,
       bedrooms: resultListing.bedrooms ?? slot.savedListing?.bedrooms ?? null,
       neighborhood: resultListing.neighborhood ?? slot.savedListing?.neighborhood ?? null,
       url: slot.mode === 'new' ? (slot.urlOrLabel?.trim() || null) : null,
@@ -837,7 +829,7 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
           </p>
         )}
         {hasDuplicateSlots && (
-          <p className="mt-2 text-sm" style={{ color: '#ffb300' }}>
+          <p className="mt-2 text-sm text-warning">
             You have the same listing in multiple slots — each slot should be a different listing.
           </p>
         )}
@@ -853,11 +845,10 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
         <div className="rounded-xl px-4 py-3 mb-6 flex items-start gap-3 border-l-4 bg-score-no-bg border-l-score-no">
           <span className="text-lg leading-none mt-0.5">⚠</span>
           <div>
-            <p className="text-sm font-medium" style={{ color: '#c62828' }}>{error}</p>
+            <p className="text-sm font-medium text-error">{error}</p>
             <button
               onClick={handleCompare}
-              className="text-sm font-semibold mt-1 underline"
-              style={{ color: '#c62828' }}
+              className="text-sm font-semibold mt-1 underline text-error"
             >
               Try again
             </button>
@@ -957,13 +948,12 @@ export default function DecisionTab({ criteria, listings, location, preloadListi
           {/* Tradeoff note */}
           {results.tradeoff_note && (
             <div
-              className="rounded-xl px-5 py-4 border-l-4 bg-score-unclear-bg"
-              style={{ borderLeftColor: '#ffb300' }}
+              className="rounded-xl px-5 py-4 border-l-4 bg-score-unclear-bg border-l-warning"
             >
               <p className="text-xs font-semibold uppercase tracking-wide mb-1 text-score-unclear">
                 Key tradeoff
               </p>
-              <p className="text-sm" style={{ color: '#374151' }}>{results.tradeoff_note}</p>
+              <p className="text-sm text-prose">{results.tradeoff_note}</p>
             </div>
           )}
         </div>
